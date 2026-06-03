@@ -1,0 +1,314 @@
+package main
+
+import (
+	_ "embed"
+	"fmt"
+	"reflect"
+	"strings"
+	"text/template"
+	"time"
+	"unicode"
+
+	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protoreflect"
+)
+
+type DBType string
+
+// DBType 数据库类型
+const (
+	DBTypeMySQL       = "mysql"
+	DBTypeTcaplus     = "tcaplus"
+	DBTypePostgresSQL = "pgsql"
+
+	timePackage         = protogen.GoImportPath("time")
+	errorsPackage       = protogen.GoImportPath("errors")
+	fmtPackage          = protogen.GoImportPath("fmt")
+	reflectPackage      = protogen.GoImportPath("reflect")
+	contextPackage      = protogen.GoImportPath("context")
+	protoPackage        = protogen.GoImportPath("google.golang.org/protobuf/proto")
+	mapstructurePackage = protogen.GoImportPath("github.com/mitchellh/mapstructure")
+
+	outputBaseInternalDir        = "internal"
+	outputProtoDir               = "proto"
+	outputTcaplusOptionProtoFile = outputBaseInternalDir + "/" + DBTypeTcaplus + "/" + outputProtoDir + "/tcaplusservice.optionv1.proto"
+)
+
+var funcMap = template.FuncMap{
+	"ToLower":             strings.ToLower,
+	"ToUpper":             strings.ToUpper,
+	"ToCamelCase":         toCamelCase,
+	"ToSnakeCase":         toSnakeCase,
+	"Join":                strings.Join,
+	"Contains":            strings.Contains,
+	"HasPrefix":           strings.HasPrefix,
+	"HasSuffix":           strings.HasSuffix,
+	"inc":                 func(i int) int { return i + 1 },
+	"needNewValue":        isNeedNewValue,
+	"isMessageValue":      isMessageValue,
+	"getTypeDefaultValue": getTypeDefaultValue,
+	"getTypeNewValue":     getTypeNewValue,
+	"getFieldType":        getFieldType,
+	"getMessageGoType":    getMessageGoType,
+	"ToGoVarName":         toGoVarName,
+	"ToPkType":            toPkType,
+	"IsZeroValue":         isZeroValue,
+	"JoinPk":              joinFieldsPk,
+	"JoinIndex":           joinFieldsIndex,
+	"IsJSONDBField":       isJSONDBField,
+	"IsEnumDBField":       isEnumDBField,
+	"getDBFieldType":      getDBFieldType,
+	"add":                 func(a, b int32) int32 { return a + b },
+	"dict": func(values ...interface{}) map[string]interface{} {
+		if len(values)%2 != 0 {
+			return nil
+		}
+		dict := make(map[string]interface{}, len(values)/2)
+		for i := 0; i < len(values); i += 2 {
+			key, ok := values[i].(string)
+			if !ok {
+				return nil
+			}
+			dict[key] = values[i+1]
+		}
+		return dict
+	},
+}
+
+func (t DBType) Suffix() string {
+	switch t {
+	case DBTypeTcaplus:
+		return "tca_"
+	case DBTypeMySQL:
+		return "tb_"
+	case DBTypePostgresSQL:
+		return "pg_"
+	}
+	return ""
+}
+
+func (t DBType) TemplateName() string {
+	switch t {
+	case DBTypeTcaplus:
+		return tcaplusTemplate
+	case DBTypeMySQL:
+		return mysqlTemplate
+	case DBTypePostgresSQL:
+		return pgsqlTemplate
+	}
+	return ""
+}
+
+// TODO dbType关联逻辑封装
+
+func supportedDBTypes() []DBType {
+	return []DBType{DBTypeMySQL, DBTypeTcaplus, DBTypePostgresSQL}
+}
+
+func defaultNodeType() string {
+	return "default"
+}
+
+func isJSONDBField(field FieldDesc) bool {
+	if field.List {
+		return true
+	}
+	if strings.HasPrefix(field.Type, "map<") {
+		return true
+	}
+	if field.F != nil {
+		desc := field.F.Desc
+		if desc.IsMap() || desc.IsList() {
+			return true
+		}
+		switch desc.Kind() {
+		case protoreflect.MessageKind, protoreflect.GroupKind:
+			return true
+		default:
+			return false
+		}
+	}
+	switch field.Type {
+	case "bool", "int32", "int64", "uint32", "uint64", "float32", "float64", "string", "bytes":
+		return false
+	}
+	return true
+}
+
+func getDBFieldType(field FieldDesc) string {
+	if isJSONDBField(field) {
+		return "bytes"
+	}
+	if isEnumDBField(field) {
+		return "int32"
+	}
+	return field.Type
+}
+
+func isEnumDBField(field FieldDesc) bool {
+	return field.F != nil && field.F.Desc.Kind() == protoreflect.EnumKind
+}
+
+// toCamelCase 转换为驼峰命名
+func toCamelCase(s string) string {
+	var result strings.Builder
+	upperNext := true
+
+	for i, r := range s {
+		if r == '_' {
+			// 检查下一个字符是否大写，如果是则保留原样
+			if i+1 < len(s) && unicode.IsUpper(rune(s[i+1])) {
+				result.WriteRune('_')
+				continue
+			}
+			upperNext = true
+			continue
+		}
+
+		if upperNext {
+			result.WriteRune(unicode.ToUpper(r))
+			upperNext = false
+		} else {
+			// 数字后的字母大写
+			if i > 0 && unicode.IsDigit(rune(s[i-1])) && unicode.IsLetter(r) {
+				result.WriteRune(unicode.ToUpper(r))
+			} else {
+				result.WriteRune(r)
+			}
+		}
+	}
+
+	return result.String()
+}
+
+// toSnakeCase 转换为蛇形命名
+func toSnakeCase(s string) string {
+	var result strings.Builder
+	for i, char := range s {
+		if i > 0 && isUpper(char) && isLower(rune(s[i-1])) {
+			result.WriteByte('_')
+		}
+		result.WriteRune(unicode.ToLower(char))
+	}
+	return result.String()
+}
+
+func isUpper(r rune) bool {
+	return 'A' <= r && r <= 'Z'
+}
+
+func isLower(r rune) bool {
+	return 'a' <= r && r <= 'z'
+}
+
+func stringEscape(s string) string {
+	var result strings.Builder
+	for _, r := range s {
+		if r == '"' || r == '\\' {
+			result.WriteByte('\\')
+		}
+		result.WriteRune(r)
+	}
+	return result.String()
+}
+
+func toGoVarName(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return s
+	}
+	// replace .
+	s = strings.ReplaceAll(s, ".", "_")
+	// replace -
+	s = strings.ReplaceAll(s, "-", "_")
+	// replace space
+	s = strings.ReplaceAll(s, " ", "_")
+	return s
+}
+
+func generateHeader(gen *protogen.Plugin, g *protogen.GeneratedFile, file *protogen.File, dbType DBType) {
+	generateBaseHeader(gen, g, dbType)
+	if file != nil {
+		if file.Proto.GetOptions().GetDeprecated() {
+			g.P("// ", file.Desc.Path(), " is a deprecated file.")
+		} else {
+			g.P("// source: ", file.Desc.Path())
+		}
+	}
+	g.P("// time ", time.Now().Format("2006-01-02"))
+	g.P()
+}
+
+func generateBaseHeader(gen *protogen.Plugin, g *protogen.GeneratedFile, dbType DBType) {
+	// Code generated by protoc-gen-go-orm. DO NOT EDIT.
+	// versions:
+	//  protoc-gen-go-orm {{.Version}}
+	//  protoc           {{.ProtocVersion}}
+	// source: {{.Source}}
+	// dbType: {{.DBType}}
+	// Table-related enhancements for {{.DBType}}.{{.Message.Name}}
+
+	g.P("// Code generated by protoc-gen-orm. DO NOT EDIT.")
+	g.P("// versions:")
+	g.P("//  protoc-gen-orm ", version)
+	protocVersion := "(unknown)"
+	if v := gen.Request.GetCompilerVersion(); v != nil {
+		protocVersion = fmt.Sprintf("v%v.%v.%v", v.GetMajor(), v.GetMinor(), v.GetPatch())
+		if s := v.GetSuffix(); s != "" {
+			protocVersion += "-" + s
+		}
+	}
+	g.P("//  protoc           ", protocVersion)
+	if len(dbType) > 0 {
+		g.P("// dbType           ", dbType)
+	}
+}
+
+func toPkType(typ string) string {
+	switch typ {
+	case "int32", "uint32", "sint32", "fixed32", "sfixed32":
+		return "int"
+	case "int64", "uint64", "sint64", "fixed64", "sfixed64":
+		return "bigint"
+	case "string":
+		return "varchar(255)"
+	default:
+		panic(fmt.Sprintf("unsupported pk type %v, only int32, int64, string supported", typ))
+	}
+}
+
+func isZeroValue(val interface{}) bool {
+	if val == nil {
+		return true
+	}
+	rv := reflect.ValueOf(val)
+	return rv.IsZero() || rv.IsNil()
+}
+
+func joinFieldsPk(msg *MessageDesc) string {
+
+	var pkFields []string
+	for _, field := range msg.Fields {
+		if field.OrmOptions.HasPrimaryKey {
+			pkFields = append(pkFields, toSnakeCase(field.Name))
+		}
+	}
+	return strings.Join(pkFields, ", ")
+}
+
+func joinFieldsIndex(msg *MessageDesc) []string {
+	var indexFields []string
+	for _, field := range msg.Fields {
+		if field.OrmOptions.HasIndex {
+			skf := msg.OrmOptions.ShardingKeyField.Value.(FieldDesc)
+			sk := skf.Name + ","
+			if skf.Name == field.Name { // 索引字段本身就是分表字段，则不需要重复添加
+				sk = ""
+			}
+			indexFields = append(indexFields, fmt.Sprintf("idx_%s_%s(%s%s)", toSnakeCase(msg.Name), field.Name, sk, field.Name))
+		}
+	}
+	//idxs := strings.Join(indexFields, ", ")
+	//return fmt.Sprintf("idx_%s(%s)", toSnakeCase(msg.Name), idxs) // TODO 支持多个联合索引定义（目前只有独立索引）
+	return indexFields
+}

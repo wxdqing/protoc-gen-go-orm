@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package orm;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/options";
+
+enum TableStoreMode {
+  TABLE_STORE_MODE_PAYLOAD = 0; // pk/index/version + data payload
+  TABLE_STORE_MODE_FIELDS = 1;  // field expansion: simple columns, complex JSON
+}
+
+extend google.protobuf.MessageOptions
+{
+  string tcaplus_primary_key             = 847900; //Tcaplus Primary Key
+  repeated string tcaplus_index                   = 847901; //Tcaplus Index
+  string tcaplus_field_cipher_suite      = 847902; //Tcaplus field crypto suite name
+  string tcaplus_record_cipher_suite     = 847903; //Tcaplus record crypto suite name
+  string tcaplus_cipher_md5              = 847904; //Tcaplus crypto key md5
+  string tcaplus_sharding_key            = 847905; //Tcaplus sharding key
+  string tcaplus_customattr              = 847906; //Tcaplus custom define attribute
+}
+
+extend google.protobuf.FieldOptions
+{
+  uint32 tcaplus_size                    = 847900; // Tcaplus field size
+  string tcaplus_desc                    = 847901; // Tcaplus description
+  bool tcaplus_crypto                    = 847902; // Tcaplus crypto
+}
+
+extend google.protobuf.MessageOptions
+{
+  bool table = 60030;
+  string node_type = 60031;
+  TableStoreMode table_store_mode = 60032;
+}
+
+// Tags are applied at the field level
+extend google.protobuf.FieldOptions {
+  // Multiple Tags can be specified.
+  string tags = 847939;
+  bool primary_key = 847940; // Marks this field as a primary key
+  bool skip_set_default = 847941; // ignore default value assignment for this field
+  bool index = 847942; // Marks this field as index
+  bool sharding_key = 847943; // Marks this field as tcaplus sharding key
+}
+
+extend google.protobuf.OneofOptions {
+  // Multiple Tags can be specified.
+  string oneof_tags = 847939;
+}

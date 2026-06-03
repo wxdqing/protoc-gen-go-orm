@@ -1,0 +1,42 @@
+{{- $g := .G -}}
+{{- range .Messages}}
+{{- if .OrmOptions.IsTable -}}
+// Get{{.Name}}Table 转换actor state为{{.Name}}类型
+func Get{{.Name}}Table(holder interface{GetStateValue() proto.Message}) *{{.Name}} {
+    return holder.GetStateValue().(*{{.Name}})
+}
+{{- end}}
+
+{{if .OrmOptions.HasVersion -}}
+// SetVersion 设置{{.Name}}的版本号
+func (x *{{.Name}}) SetVersion(ver int64) {
+    if x == nil {
+        return
+    }
+    x.Version = ver
+}
+{{- end}}
+
+{{template "defaults" (dict "G" $g "M" .)}}
+{{- end}}
+
+{{- define "defaults" }}{{- $g := .G -}}
+func Set{{ToCamelCase (getMessageGoType .G .M.Desc)}}Defaults(r *{{ToCamelCase (getMessageGoType .G .M.Desc)}}) {
+    if r == nil {
+        return
+    }
+    {{range .M.Fields -}}
+    {{- if not .SkipSetDefault -}}
+    {{if (needNewValue .F.Desc) -}}
+    if r.{{ToCamelCase .Name}} == {{getTypeDefaultValue .F.Desc}} {
+        r.{{ToCamelCase .Name}} = {{getTypeNewValue $g .}}{{ if isMessageValue .F.Desc }}
+        Set{{ToCamelCase (ToGoVarName (getFieldType .F)) }}Defaults(r.{{ToCamelCase .Name}}){{- end }}
+    }
+    {{end}}{{end}}
+    {{- end}}
+}
+{{range .M.NestedMessages -}}
+// nested messages
+{{template  "defaults" (dict "G" $g "M" .)}}
+{{- end}}
+{{- end }}

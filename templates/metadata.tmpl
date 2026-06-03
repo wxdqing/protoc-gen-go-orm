@@ -1,0 +1,39 @@
+var Tables = make(map[string][]proto.Message)
+var NodeTables = make(map[string]map[string][]proto.Message){{- $f := . }}
+
+func init() {
+    {{- $msgs := .Messages -}}
+    {{- range .DBTypes }}
+    {{- $dbType := . -}}
+    // {{.}} database tables
+    Tables["{{.}}"] = []proto.Message{
+        {{- range $msgs }}
+        &{{$dbType}}.{{.Name}}{},
+        {{- end }}
+    }
+    NodeTables["{{.}}"] = make(map[string][]proto.Message)
+        {{- range $msgs }}
+        NodeTables["{{$dbType}}"]["{{.OrmOptions.NodeType.Value}}"] = append(NodeTables["{{$dbType}}"]["{{.OrmOptions.NodeType.Value}}"], &{{$dbType}}.{{.Name}}{})
+        {{- end }}
+    {{- end }}
+
+    {{- range $k, $arr := .DirectMessages -}}
+    {{ range $arr }}
+    Tables["{{$k}}"] = append(Tables["{{$k}}"], &{{$f.Package}}.{{.Name}}{})
+    {{ end }}
+    {{- end}}
+}
+
+func GetAllTables(dbType string) []proto.Message {
+	if m, ok := Tables[dbType]; ok {
+		return m
+	}
+	return nil
+}
+
+func GetNodeTables(dbType string, nodeType string) []proto.Message {
+	if m, ok := NodeTables[dbType]; ok {
+		return m[nodeType]
+	}
+	return nil
+}

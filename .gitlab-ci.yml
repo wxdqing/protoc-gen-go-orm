@@ -1,0 +1,60 @@
+stages:
+  - ghdocs-ci
+  - sync-to-tcgit
+  - tcgit-notify
+
+ghdoc-ci-job:
+  stage: ghdocs-ci
+  script:
+    - echo "Collecting docs.. . "
+    - wget http://git.ghgame.local/gh-flow-public/md-file-spider/raw/master/binary/sync-docs.sh
+    - chmod +x sync-docs.sh
+    - bash ./sync-docs.sh
+    - echo "Collecting docs has finished..."
+  tags:
+    - docs
+  allow_failure: true
+
+sync-to-tcgit:
+  stage: sync-to-tcgit
+  script:
+    - echo "Syncing to tcgit..."
+    - bash ./sync-to-tcgit.sh
+
+notify-after-sync-success:
+  stage: tcgit-notify
+  script:
+    - |
+      curl "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=10c3fadf-a1b1-461f-88ad-a309a5b4309b" \
+      -H "Content-Type: application/json" \
+      -d @- <<EOF 
+      {
+        "msgtype": "text",
+        "text": {
+          "content": "${CI_PROJECT_NAME} 同步工蜂库成功 \n 分支:${CI_COMMIT_REF_NAME} \n git-hash:${CI_COMMIT_SHA} \n git-commit: ${CI_COMMIT_MESSAGE}"
+        }
+      }
+      EOF
+  when: on_success
+  needs:
+    - job: sync-to-tcgit
+      artifacts: false
+
+post_notify_failed:
+  stage: tcgit-notify
+  script:
+    - |
+      curl "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=10c3fadf-a1b1-461f-88ad-a309a5b4309b" \
+      -H "Content-Type: application/json" \
+      -d @- <<EOF
+      {
+        "msgtype": "text",
+        "text": {
+            "content": "${CI_PROJECT_NAME} 同步工蜂库失败，请检查流水线：[http://git.ghgame.local/go-sprout/${CI_PROJECT_NAME}/-/pipelines]"
+        }
+      }
+      EOF
+  when: on_failure
+  needs:
+    - job: sync-to-tcgit
+      artifacts: false

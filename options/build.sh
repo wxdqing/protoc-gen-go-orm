@@ -1,0 +1,1 @@
+exec protoc --go_out=paths=source_relative:. -I=. *.proto

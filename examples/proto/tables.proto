@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package src;
+
+import "orm.option.proto";
+
+option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/examples/src";
+
+message Example {
+  string with_new_tags = 1 [(orm.tags) = "graphql:\"withNewTags,optional\"" ];
+  string with_new_multiple = 2 [(orm.tags) = "graphql:\"withNewTags,optional\" xml:\"multi,omitempty\"" ];
+
+  string replace_default = 3 [(orm.tags) = "json:\"replacePrevious\""] ;
+
+  oneof one_of {
+    option (orm.oneof_tags) = "graphql:\"withNewTags,optional\"";
+    string a = 5 [(orm.tags) = "json:\"A\""];
+    int32 b_jk = 6 [(orm.tags) = "json:\"b_Jk\""];
+  }
+  repeated int32 ll = 7;
+  map<string, int32> mm = 8 [(orm.tags) = "json:\"mm\""];
+  map<int32,EmptyFieldMessage> nn = 9 [(orm.tags) = "json:\"nn\""];
+  map<string,OuterEnum> ee = 10 [(orm.tags) = "json:\"ee\""];
+  bytes array = 11 [(orm.tags) = "json:\"array\""];
+}
+
+message SecondMessage {
+  string with_new_tags = 1 [(orm.tags) = "graphql:\"withNewTags,optional\"" ];
+  string with_new_multiple = 2 [(orm.tags) = "graphql:\"withNewTags,optional\" xml:\"multi,omitempty\"" ];
+
+  string replace_default = 3 [(orm.tags) = "json:\"replacePrevious\""] ;
+  enum InnerEnum {
+    IE1 = 0;
+    IE2 = 1;
+    IE3 = 2;
+  }
+  InnerEnum inner_enum = 4 [(orm.tags) = "json:\"innerEnum\""];
+  OuterEnum outer_enum = 5 [(orm.tags) = "json:\"outerEnum\""];
+}
+
+message ThirdExample {
+  message InnerExample {
+    string id = 1 [(orm.tags) = "json:\"yes\""];
+    int32 yes = 2 [(orm.tags) = "json:\"id\""];
+  }
+
+  InnerExample inner_example = 1 [(orm.tags) = "json:\"inner\""];
+}
+
+enum OuterEnum {
+  E1 = 0;
+  E2 = 1;
+  E3 = 2;
+}
+
+message EmptyFieldMessage {
+
+}

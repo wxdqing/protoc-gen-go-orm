@@ -1,0 +1,148 @@
+{{- $dbType := .DBType -}}
+{{- if eq $dbType "mysql" -}}
+{{template "mysql" .}}
+{{- else if eq $dbType "tcaplus" -}}
+{{template "mysql" .}}
+{{- end -}}
+
+{{- define "mysql"}}
+{{- $pkg := .Package -}}
+{{- $dbType := .DBType -}}
+{{range .Messages}}
+// methods for {{$pkg}}.{{.Name}} in {{$dbType}}
+
+func (m *{{.Name}}) TableName() string {
+    return "{{.TableName}}" //string(m.ProtoReflect().Descriptor().Name())
+}
+
+func (m *{{.Name}}) NewValue() proto.Message {
+    return &{{$pkg}}.{{.Name}}{}
+}
+
+func (m *{{.Name}}) PrimaryKey() []any {
+    return []any{ {{range .Fields}}{{if .OrmOptions.HasPrimaryKey}}m.{{ToCamelCase .Name}},{{end}}{{end}} }
+}
+
+func (m *{{.Name}}) PrimaryKeyNames() []string {
+    return []string{
+    {{range .Fields}}{{if .OrmOptions.HasPrimaryKey}}"{{ToSnakeCase .Name}}",{{end}}{{end}}
+    }
+}
+
+func (m *{{.Name}}) ToPrimaryKeyMap() map[string]any {
+    ret:= make(map[string]any)
+    {{range .Fields}}
+    {{if .OrmOptions.HasPrimaryKey}}if !m.isZeroValue(m.{{ToCamelCase .Name}}) {
+        ret["{{ToSnakeCase .Name}}"] = m.{{ToCamelCase .Name}}
+    }{{end}}{{end}}
+
+	return ret
+}
+
+func (m *{{.Name}}) ToPrimaryKeyStruct() any {
+    s := &{{.Name}}{}
+    {{range .Fields}}
+    {{if .OrmOptions.HasPrimaryKey}}if !m.isZeroValue(m.{{ToCamelCase .Name}}) {
+        s.{{ToCamelCase .Name}} = m.{{ToCamelCase .Name}}
+    }{{end}}
+    {{end}}
+	return s
+}
+
+func (m *{{.Name}}) Indexes() []any {
+	return []any{ {{range .Fields}}{{if .OrmOptions.HasIndex}}m.{{ToCamelCase .Name}},{{end}}{{end}} }
+}
+
+func (m *{{.Name}}) IndexNames() []string {
+	return []string{ {{range .Fields}}{{if .OrmOptions.HasIndex}}"{{ToSnakeCase .Name}}",{{end}}{{end}} }
+}
+
+func (m *{{.Name}}) ToIndexMap() map[string]any {
+	ret:= map[string]any{}
+	{{range .Fields}}
+    {{if .OrmOptions.HasIndex}}if !m.isZeroValue(m.{{ToCamelCase .Name}}) {
+        ret["{{ToSnakeCase .Name}}"] = m.{{ToCamelCase .Name}}
+    }{{end}}{{end}}
+	return ret
+}
+
+func (m *{{.Name}}) ToIndexStruct() any {
+	s := &{{.Name}}{}
+    {{range .Fields}}
+    {{if .OrmOptions.HasIndex}}if !m.isZeroValue(m.{{ToCamelCase .Name}}) {
+        s.{{ToCamelCase .Name}} = m.{{ToCamelCase .Name}}
+    }{{end}}{{end}}
+    return s
+}
+
+func (m *{{.Name}}) isZeroValue(val any) bool {
+    rv := reflect.ValueOf(val)
+    return rv.IsZero() || rv.IsNil()
+}
+
+func (m *{{.Name}}) EncodeFrom(value proto.Message) error {
+    r := value.(*{{$pkg}}.{{.Name}})
+    {{range .Fields -}}
+    {{if .OrmOptions.HasPrimaryKey}}m.{{ToCamelCase .Name}} = r.{{ToCamelCase .Name}} // set pk{{end}}
+    {{if .OrmOptions.HasIndex}}m.{{ToCamelCase .Name}} = r.{{ToCamelCase .Name}} // set index{{end}}
+    {{- end}}
+    d, err := proto.Marshal(value)
+    if err != nil {
+        return err
+    }
+    m.Data = d
+    return nil
+}
+
+func (m *{{.Name}}) DecodeTo(value proto.Message) error {
+    err := proto.Unmarshal(m.Data, value)
+    if err != nil {
+        return err
+    }
+    {{$pkg}}.Set{{.Name}}Defaults(value.(*{{$pkg}}.{{.Name}}))
+    return nil
+}
+{{- end }}
+
+{{- end}}
+
+{{- define "tcaplus"}}
+
+{{- $pkg := .Package -}}
+{{- $dbType := .DBType -}}
+{{range .Messages}}
+// methods for {{$pkg}}.{{.Name}} in {{$dbType}}
+func (m *{{.Name}}) TableName() string {
+    return  string(m.ProtoReflect().Descriptor().Name())
+}
+
+func (m *{{.Name}}) NewValue() proto.Message {
+    return &{{$pkg}}.{{.Name}}{}
+}
+
+func (m *{{.Name}}) PrimaryKey() []any {
+    {{- $pkCount := 0 -}}
+    {{- range .Fields -}}
+    {{- if .TcaplusPrimaryKey -}}
+    {{- $pkCount = inc $pkCount -}}
+    {{- end -}}
+    {{- end }}
+    return []any{ {{range .Fields}}{{if .TcaplusPrimaryKey}}m.{{ToCamelCase .Name}},{{end}}{{end}} }
+}
+
+func (m *{{.Name}}) EncodeFrom(value proto.Message) error {
+    r := value.(*{{$pkg}}.{{.Name}})
+    return mapstructure.Decode(r, &m)
+}
+
+func (m *{{.Name}}) DecodeTo(value proto.Message) error {
+    err := mapstructure.Decode(m, &value)
+    if err != nil {
+        return err
+    }
+    {{$pkg}}.Set{{.Name}}Defaults(value.(*{{$pkg}}.{{.Name}}))
+    return nil
+}
+{{- end }}
+
+{{- end}}

@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package src;
+
+import "orm.option.proto";
+
+option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/examples/src";
+
+message Player {
+  option (orm.table) = true;
+  option (orm.node_type) = "game";
+  option (orm.table_store_mode) = TABLE_STORE_MODE_FIELDS;
+  option (orm.tcaplus_primary_key) = "id";
+  option (orm.tcaplus_index) = "level,exp";
+//  option (orm.tcaplus_sharding_key) = "id";
+  option (orm.tcaplus_record_cipher_suite) = "default_record_suite";
+  option (orm.tcaplus_field_cipher_suite) = "default_field_suite";
+  option (orm.tcaplus_cipher_md5) = "d41d8cd98f00b204e9800998ecf8427e";
+  option (orm.tcaplus_customattr) = "custom_attribute_value";
+
+  int64  id = 1 [
+    (orm.tags) = "gorm:\"column:id;primary_key;<-:create;autoIncrement:true\" json:\"id\"",
+    (orm.primary_key) = true
+  ];
+  string name = 2 [(orm.tags) = "gorm:\"size:255;index;not null\" json:\"name\"",(orm.index) = true ];
+  int32  level = 3 [(orm.tags) = "gorm:\"default:1\" json:\"level\""];
+  int64  exp = 4 [(orm.tags) = "gorm:\"default:0\" json:\"exp\""];
+  // heros is blob data in gorm
+  repeated Hero heros = 5 [(orm.tags) = "gorm:\"type:blob\" json:\"heros\""];
+  BaseModel baseModel = 6 [(orm.tags) = "gorm:\"embedded\""];
+  map<string, int32> settings = 7;
+  repeated int32 array =8;
+  PlayerEnum player_enum = 9 [(orm.tags) = "json:\"playerEnum\""];
+  repeated PlayerEnum enums = 10 [(orm.tags) = "json:\"enums\""];
+  bytes data = 11 [(orm.tags) = "json:\"data\""];
+  map<int32,BaseModel> models = 12 [(orm.tags) = "json:\"models\""];
+  BaseModel skip_me = 13 [(orm.tags) = "-", (orm.skip_set_default) = true];
+  reserved 14 to 20;
+  message NestedM{
+    message Nested2{
+      int64 f1 = 1;
+      string f2 = 2;
+      map<string,int32> f3 = 3;
+    }
+    int64 f1 = 1;
+    string f2 = 2;
+    map<string,int32> f3 = 3;
+    Nested2 f4 = 4;
+    map<string,Nested2> f5 = 5;
+    repeated Nested2 f6 = 6;
+  }
+  NestedM nested = 21 [(orm.tags) = "json:\"nested\""];
+  repeated NestedM nesteds = 22 [(orm.tags) = "json:\"nesteds\""];
+  map<string,NestedM> nested_map = 23 [(orm.tags) = "json:\"nestedMap\""];
+
+  NestedM.Nested2 nested2 = 24 [(orm.tags) = "json:\"nested2\""];
+  repeated NestedM.Nested2 n2s = 25 [(orm.tags) = "json:\"nested2s\""];
+  map<string,NestedM.Nested2> nested2_map = 26 [(orm.tags) = "json:\"nested2Map\""];
+
+  int64 version = 27;
+}
+
+message Hero {
+  int64  id = 1 ;
+  int32 cid = 2 ;
+  int32  hero_level = 3 [(orm.tags) = "json:\"heroLevel\""];
+}
+
+message BaseModel {
+  int64 CreatedAt = 1 [(orm.tags) = "gorm:\"autoCreateTime;<-:create\" json:\"createdAt\""];
+  int64 UpdatedAt = 2 [(orm.tags) = "gorm:\"autoUpdateTime\" json:\"updatedAt\""];
+}
+
+enum PlayerEnum {
+  None = 0;
+  Test1 = 1;
+  Test2 = 2;
+}

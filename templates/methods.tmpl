@@ -1,0 +1,182 @@
+{{- $dbType := .DBType -}}
+
+{{template "methods" .}}
+
+{{- define "methods"}}
+{{- $pkg := .Package -}}
+{{- $dbType := .DBType -}}
+{{range .Messages}}
+// methods for {{$pkg}}.{{.Name}} in {{$dbType}}
+
+func (m *{{.Name}}) TableName() string {
+    return "{{.TableName}}" //string(m.ProtoReflect().Descriptor().Name())
+}
+
+func (m *{{.Name}}) NewValue() proto.Message {
+    return &{{$pkg}}.{{.Name}}{}
+}
+
+func (m *{{.Name}}) PrimaryKey() []any {
+    return []any{ {{range .Fields}}{{if .OrmOptions.HasPrimaryKey}}m.{{ToCamelCase .Name}},{{end}}{{end}} }
+}
+
+func (m *{{.Name}}) PrimaryKeyNames() []string {
+    return []string{
+    {{range .Fields}}{{if .OrmOptions.HasPrimaryKey}}"{{ToSnakeCase .Name}}",{{end}}{{end}}
+    }
+}
+
+func (m *{{.Name}}) ToPrimaryKeyMap() map[string]any {
+    ret:= make(map[string]any)
+    {{range .Fields}}
+    {{if .OrmOptions.HasPrimaryKey}}if !m.isZeroValue(m.{{ToCamelCase .Name}}) {
+        ret["{{ToSnakeCase .Name}}"] = m.{{ToCamelCase .Name}}
+    }{{end}}{{end}}
+
+	return ret
+}
+
+func (m *{{.Name}}) ToPrimaryKeyStruct() any {
+    s := &{{.Name}}{}
+    {{range .Fields}}
+    {{if .OrmOptions.HasPrimaryKey}}if !m.isZeroValue(m.{{ToCamelCase .Name}}) {
+        s.{{ToCamelCase .Name}} = m.{{ToCamelCase .Name}}
+    }{{end}}{{end}}
+	return s
+}
+
+func (m *{{.Name}}) Indexes() []any {
+	return []any{ {{range .Fields}}{{if .OrmOptions.HasIndex}}m.{{ToCamelCase .Name}},{{end}}{{end}} }
+}
+
+func (m *{{.Name}}) IndexNames() []string {
+	return []string{ {{range .Fields}}{{if .OrmOptions.HasIndex}}"{{ToSnakeCase .Name}}",{{end}}{{end}} }
+}
+
+func (m *{{.Name}}) ToIndexMap() map[string]any {
+	ret:= map[string]any{}
+	{{range .Fields}}
+    {{if .OrmOptions.HasIndex}}if !m.isZeroValue(m.{{ToCamelCase .Name}}) {
+        ret["{{ToSnakeCase .Name}}"] = m.{{ToCamelCase .Name}}
+    }{{end}}{{end}}
+	return ret
+}
+
+func (m *{{.Name}}) ToIndexStruct() any {
+	s := &{{.Name}}{}
+    {{range .Fields}}
+    {{if .OrmOptions.HasIndex}}if !m.isZeroValue(m.{{ToCamelCase .Name}}) {
+        s.{{ToCamelCase .Name}} = m.{{ToCamelCase .Name}}
+    }{{end}}{{end}}
+    return s
+}
+
+func (m *{{.Name}}) isZeroValue(val any) bool {
+    rv := reflect.ValueOf(val)
+    return rv.IsZero() //|| rv.IsNil()
+}
+
+func (m *{{.Name}}) EncodeFrom(value proto.Message) error {
+    return m.EncodeFromContext(nil, value)
+}
+
+func (m *{{.Name}}) EncodeFromContext(ctx Context, value proto.Message) error {
+    if hook, ok := any(m).(BeforeEncodeHook); ok {
+        if err := hook.BeforeEncode(ctx, value); err != nil {
+            return err
+        }
+    }
+    r := value.(*{{$pkg}}.{{.Name}})
+    {{if and (eq .OrmOptions.TableStoreMode 1) (ne $dbType "tcaplus") -}}
+    {{range .Fields -}}
+    {{if not .OrmOptions.IsJSONField -}}
+    {{if IsEnumDBField . -}}
+    m.{{ToCamelCase .Name}} = int32(r.{{ToCamelCase .Name}})
+    {{else -}}
+    m.{{ToCamelCase .Name}} = r.{{ToCamelCase .Name}}
+    {{end -}}
+    {{end -}}
+    {{end -}}
+    {{else -}}
+    {{range .Fields -}}
+    {{if .OrmOptions.HasPrimaryKey -}}
+    m.{{ToCamelCase .Name}} = r.{{ToCamelCase .Name}} // set pk{{end}}
+    {{if .OrmOptions.HasIndex -}}
+    m.{{ToCamelCase .Name}} = r.{{ToCamelCase .Name}} // set index{{end}}
+    {{end}}
+    d, err := proto.Marshal(value)
+    if err != nil {
+        return err
+    }
+    m.Data = d
+    {{end -}}
+    {{if .OrmOptions.HasVersion -}}
+    vp := value.(interface{
+        GetVersion() int64
+    })
+    m.Version = vp.GetVersion()
+    {{- end}}
+    if hook, ok := any(m).(AfterEncodeHook); ok {
+        if err := hook.AfterEncode(ctx, value); err != nil {
+            return err
+        }
+    }
+    return nil
+}
+
+func (m *{{.Name}}) DecodeTo(value proto.Message) error {
+    return m.DecodeToContext(nil, value)
+}
+
+func (m *{{.Name}}) DecodeToContext(ctx Context, value proto.Message) error {
+    if hook, ok := any(m).(BeforeDecodeHook); ok {
+        if err := hook.BeforeDecode(ctx, value); err != nil {
+            return err
+        }
+    }
+    {{if and (eq .OrmOptions.TableStoreMode 1) (ne $dbType "tcaplus") -}}
+    r := value.(*{{$pkg}}.{{.Name}})
+    {{range .Fields -}}
+    {{if not .OrmOptions.IsJSONField -}}
+    {{if IsEnumDBField . -}}
+    r.{{ToCamelCase .Name}} = {{$pkg}}.{{getFieldType .F}}(m.{{ToCamelCase .Name}})
+    {{else -}}
+    r.{{ToCamelCase .Name}} = m.{{ToCamelCase .Name}}
+    {{end -}}
+    {{end -}}
+    {{end -}}
+    {{else -}}
+    err := proto.Unmarshal(m.Data, value)
+    if err != nil {
+        return err
+    }
+    {{end -}}
+    {{if .OrmOptions.HasVersion -}}
+    vp := value.(interface{
+        SetVersion(ver int64)
+    })
+    vp.SetVersion(m.Version)
+    {{- end}}
+    {{$pkg}}.Set{{.Name}}Defaults(value.(*{{$pkg}}.{{.Name}}))
+    if hook, ok := any(m).(AfterDecodeHook); ok {
+        if err := hook.AfterDecode(ctx, value); err != nil {
+            return err
+        }
+    }
+    return nil
+}
+
+
+{{if .OrmOptions.HasVersion -}}
+// SetVersion 设置{{.Name}}的版本号
+func (m *{{.Name}}) SetVersion(ver int64) {
+    if m == nil {
+        return
+    }
+    m.Version = ver
+}
+{{- end}}
+
+{{- end }}
+
+{{- end}}

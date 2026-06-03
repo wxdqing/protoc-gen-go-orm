@@ -1,0 +1,19 @@
+type Context interface {
+	Value(key any) any
+}
+
+type BeforeEncodeHook interface {
+	BeforeEncode(ctx Context, value proto.Message) error
+}
+
+type AfterEncodeHook interface {
+	AfterEncode(ctx Context, value proto.Message) error
+}
+
+type BeforeDecodeHook interface {
+	BeforeDecode(ctx Context, value proto.Message) error
+}
+
+type AfterDecodeHook interface {
+	AfterDecode(ctx Context, value proto.Message) error
+}
