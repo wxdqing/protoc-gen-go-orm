@@ -4,11 +4,13 @@ package src;
 
 import "orm.option.proto";
 
-option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/examples/src";
+option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src";
 
 message Lister {
   option (orm.table) = true;
   option (orm.node_type) = "social";
+  option (orm.table_store_mode) = TABLE_STORE_MODE_PAYLOAD;
+  option (orm.composite_index) = "idx_lister_rid_id(rid,id)";
   int64 rid = 1 [ (orm.primary_key) = true,(orm.index) = true];// 角色ID
   int64 id = 2[ (orm.primary_key) = true];
   bytes data = 3; // 离线消息数据

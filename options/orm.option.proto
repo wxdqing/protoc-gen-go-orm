@@ -4,7 +4,7 @@ package orm;
 
 import "google/protobuf/descriptor.proto";
 
-option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/options";
+option go_package = "github.com/wxdqing/protoc-gen-go-orm/options";
 
 enum TableStoreMode {
   TABLE_STORE_MODE_PAYLOAD = 0; // pk/index/version + data payload
@@ -34,6 +34,8 @@ extend google.protobuf.MessageOptions
   bool table = 60030;
   string node_type = 60031;
   TableStoreMode table_store_mode = 60032;
+  // 联合索引，格式：idx_name(col1,col2)，用于 GORM 同 index 名多列与 tcaplus_index
+  repeated string composite_index = 60033;
 }
 
 // Tags are applied at the field level
