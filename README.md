@@ -1,5 +1,7 @@
 # protoc-gen-go-orm
 
+集成风险、缺口与 ORM 完成度评估见仓库根目录 **[`docs/protoc-gen-go-orm/`](../docs/protoc-gen-go-orm/README.md)**。
+
 ## Getting started
 
 ## Description
@@ -36,8 +38,10 @@
 
 ## Roadmap
 
-- [ ] fatal in template
-- [ ] embed of mysql
-- [ ] redis driver support
-- [ ] custom tags support
-- [ ] more examples
+- [x] fatal in template（模板内 `fail` 辅助）
+- [x] embed of mysql（`BaseModel` 等嵌入模型）
+- [x] redis/mongo KV generation + ORM CRUD
+- [x] custom tags（`type:blob` → wire；其余 JSON 列）
+- [x] FIELDS 模式 examples + `-tags=db` 集成测
+- [x] 联合索引生成（G-08，`orm.composite_index`）
+- [x] more examples
