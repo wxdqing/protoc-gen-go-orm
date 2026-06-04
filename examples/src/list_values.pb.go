@@ -16,6 +16,11 @@ func GetListerTable(holder interface{ GetStateValue() proto.Message }) *Lister {
 	return holder.GetStateValue().(*Lister)
 }
 
+// ShardingKey 供 go-orm 分片路由（orm.ShardingKeyProvider）
+func (x *Lister) ShardingKey() int64 {
+	return x.Rid
+}
+
 func SetListerDefaults(r *Lister) {
 	if r == nil {
 		return

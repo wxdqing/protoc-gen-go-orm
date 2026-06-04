@@ -7,7 +7,7 @@
 package src
 
 import (
-	_ "github.com/wxdqing/protoc-gen-go-orm.git/options"
+	_ "github.com/wxdqing/protoc-gen-go-orm/options"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -598,7 +598,7 @@ const file_players_proto_rawDesc = "" +
 	"PlayerEnum\x12\b\n" +
 	"\x04None\x10\x00\x12\t\n" +
 	"\x05Test1\x10\x01\x12\t\n" +
-	"\x05Test2\x10\x02B?Z=github.com/wxdqing/protoc-gen-go-orm.git/examples/srcb\x06proto3"
+	"\x05Test2\x10\x02B3Z1github.com/wxdqing/protoc-gen-go-orm/examples/srcb\x06proto3"
 
 var (
 	file_players_proto_rawDescOnce sync.Once

@@ -7,7 +7,7 @@
 package src
 
 import (
-	_ "github.com/wxdqing/protoc-gen-go-orm.git/options"
+	_ "github.com/wxdqing/protoc-gen-go-orm/options"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -523,7 +523,7 @@ const file_tables_proto_rawDesc = "" +
 	"\tOuterEnum\x12\x06\n" +
 	"\x02E1\x10\x00\x12\x06\n" +
 	"\x02E2\x10\x01\x12\x06\n" +
-	"\x02E3\x10\x02B?Z=github.com/wxdqing/protoc-gen-go-orm.git/examples/srcb\x06proto3"
+	"\x02E3\x10\x02B3Z1github.com/wxdqing/protoc-gen-go-orm/examples/srcb\x06proto3"
 
 var (
 	file_tables_proto_rawDescOnce sync.Once

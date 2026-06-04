@@ -109,7 +109,7 @@ var File_tca_list_proto protoreflect.FileDescriptor
 
 const file_tca_list_proto_rawDesc = "" +
 	"\n" +
-	"\x0etca_list.proto\x12\atcaplus\x1a\x1dtcaplusservice.optionv1.proto\"\xaa\x01\n" +
+	"\x0etca_list.proto\x12\atcaplus\x1a\x1dtcaplusservice.optionv1.proto\"\xc7\x01\n" +
 	"\x06Lister\x12\x10\n" +
 	"\x03rid\x18\x01 \x01(\x03R\x03rid\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\x03R\x02id\x12\x13\n" +
@@ -117,7 +117,7 @@ const file_tca_list_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
 	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt:)\x82\xa6\x1d\arid, id\x8a\xa6\x1d\x13idx_lister_rid(rid)\xaa\xa6\x1d\x03ridB\x16Z\x14src/internal/tcaplusb\x06proto3"
+	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt:F\x82\xa6\x1d\arid, id\x8a\xa6\x1d\x19idx_lister_rid_id(rid,id)\x8a\xa6\x1d\x13idx_lister_rid(rid)\xaa\xa6\x1d\x03ridB\x16Z\x14src/internal/tcaplusb\x06proto3"
 
 var (
 	file_tca_list_proto_rawDescOnce sync.Once

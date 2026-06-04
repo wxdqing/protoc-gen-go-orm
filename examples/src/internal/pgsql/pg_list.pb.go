@@ -31,11 +31,11 @@ const (
 // PostgreSQL表结构定义
 type Lister struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Rid           int64                  `protobuf:"varint,1,opt,name=rid,proto3" json:"rid,omitempty"` //{  "origin":"rid" }
-	Id            int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`   //{  "origin":"id" }
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Rid           int64                  `protobuf:"varint,1,opt,name=rid,proto3" json:"rid,omitempty" gorm:"index:idx_lister_rid_id;column:rid"` //{ "index":"index:idx_lister_rid_id;column:rid",   "origin":"rid" }
+	Id            int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty" gorm:"index:idx_lister_rid_id;column:id"`    //{ "index":"index:idx_lister_rid_id;column:id",   "origin":"id" }
+	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty" gorm:"column:data;type:bytea"`
+	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" gorm:"column:created_at;autoCreateTime;<-:create"`
+	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"column:updated_at;autoUpdateTime"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -117,7 +117,7 @@ const file_pg_list_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
 	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAtBNZLgithub.com/wxdqing/protoc-gen-go-orm.git/examples/src/internal/pgsqlb\x06proto3"
+	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAtBBZ@github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/pgsqlb\x06proto3"
 
 var (
 	file_pg_list_proto_rawDescOnce sync.Once

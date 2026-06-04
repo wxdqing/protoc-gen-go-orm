@@ -16,6 +16,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
+	sync "sync"
 	unsafe "unsafe"
 )
 
@@ -26,13 +27,303 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Example
+// MySQL表结构定义
+type Example struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Example) Reset() {
+	*x = Example{}
+	mi := &file_tb_tables_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Example) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Example) ProtoMessage() {}
+
+func (x *Example) ProtoReflect() protoreflect.Message {
+	mi := &file_tb_tables_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Example.ProtoReflect.Descriptor instead.
+func (*Example) Descriptor() ([]byte, []int) {
+	return file_tb_tables_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Example) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *Example) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *Example) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+// SecondMessage
+// MySQL表结构定义
+type SecondMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SecondMessage) Reset() {
+	*x = SecondMessage{}
+	mi := &file_tb_tables_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SecondMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SecondMessage) ProtoMessage() {}
+
+func (x *SecondMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_tb_tables_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SecondMessage.ProtoReflect.Descriptor instead.
+func (*SecondMessage) Descriptor() ([]byte, []int) {
+	return file_tb_tables_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SecondMessage) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *SecondMessage) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *SecondMessage) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+// ThirdExample
+// MySQL表结构定义
+type ThirdExample struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ThirdExample) Reset() {
+	*x = ThirdExample{}
+	mi := &file_tb_tables_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ThirdExample) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ThirdExample) ProtoMessage() {}
+
+func (x *ThirdExample) ProtoReflect() protoreflect.Message {
+	mi := &file_tb_tables_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ThirdExample.ProtoReflect.Descriptor instead.
+func (*ThirdExample) Descriptor() ([]byte, []int) {
+	return file_tb_tables_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ThirdExample) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *ThirdExample) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *ThirdExample) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+// EmptyFieldMessage
+// MySQL表结构定义
+type EmptyFieldMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmptyFieldMessage) Reset() {
+	*x = EmptyFieldMessage{}
+	mi := &file_tb_tables_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmptyFieldMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmptyFieldMessage) ProtoMessage() {}
+
+func (x *EmptyFieldMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_tb_tables_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmptyFieldMessage.ProtoReflect.Descriptor instead.
+func (*EmptyFieldMessage) Descriptor() ([]byte, []int) {
+	return file_tb_tables_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *EmptyFieldMessage) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *EmptyFieldMessage) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *EmptyFieldMessage) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
 var File_tb_tables_proto protoreflect.FileDescriptor
 
 const file_tb_tables_proto_rawDesc = "" +
 	"\n" +
-	"\x0ftb_tables.proto\x12\x05mysqlBNZLgithub.com/wxdqing/protoc-gen-go-orm.git/examples/src/internal/mysqlb\x06proto3"
+	"\x0ftb_tables.proto\x12\x05mysql\"^\n" +
+	"\aExample\x12\x13\n" +
+	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
+	"\n" +
+	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
+	"\n" +
+	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt\"d\n" +
+	"\rSecondMessage\x12\x13\n" +
+	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
+	"\n" +
+	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
+	"\n" +
+	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt\"c\n" +
+	"\fThirdExample\x12\x13\n" +
+	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
+	"\n" +
+	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
+	"\n" +
+	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt\"h\n" +
+	"\x11EmptyFieldMessage\x12\x13\n" +
+	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
+	"\n" +
+	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
+	"\n" +
+	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAtBBZ@github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/mysqlb\x06proto3"
 
-var file_tb_tables_proto_goTypes = []any{}
+var (
+	file_tb_tables_proto_rawDescOnce sync.Once
+	file_tb_tables_proto_rawDescData []byte
+)
+
+func file_tb_tables_proto_rawDescGZIP() []byte {
+	file_tb_tables_proto_rawDescOnce.Do(func() {
+		file_tb_tables_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_tb_tables_proto_rawDesc), len(file_tb_tables_proto_rawDesc)))
+	})
+	return file_tb_tables_proto_rawDescData
+}
+
+var file_tb_tables_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_tb_tables_proto_goTypes = []any{
+	(*Example)(nil),           // 0: mysql.Example
+	(*SecondMessage)(nil),     // 1: mysql.SecondMessage
+	(*ThirdExample)(nil),      // 2: mysql.ThirdExample
+	(*EmptyFieldMessage)(nil), // 3: mysql.EmptyFieldMessage
+}
 var file_tb_tables_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
@@ -52,12 +343,13 @@ func file_tb_tables_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tb_tables_proto_rawDesc), len(file_tb_tables_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   0,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_tb_tables_proto_goTypes,
 		DependencyIndexes: file_tb_tables_proto_depIdxs,
+		MessageInfos:      file_tb_tables_proto_msgTypes,
 	}.Build()
 	File_tb_tables_proto = out.File
 	file_tb_tables_proto_goTypes = nil

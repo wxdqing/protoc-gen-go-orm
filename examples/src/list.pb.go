@@ -7,7 +7,7 @@
 package src
 
 import (
-	_ "github.com/wxdqing/protoc-gen-go-orm.git/options"
+	_ "github.com/wxdqing/protoc-gen-go-orm/options"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -87,12 +87,12 @@ var File_list_proto protoreflect.FileDescriptor
 const file_list_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"list.proto\x12\x03src\x1a\x10orm.option.proto\"a\n" +
+	"list.proto\x12\x03src\x1a\x10orm.option.proto\"\x82\x01\n" +
 	"\x06Lister\x12\x1c\n" +
 	"\x03rid\x18\x01 \x01(\x03B\n" +
 	"\xa0\x84\x9e\x03\x01\xb0\x84\x9e\x03\x01R\x03rid\x12\x15\n" +
 	"\x02id\x18\x02 \x01(\x03B\x05\xa0\x84\x9e\x03\x01R\x02id\x12\x12\n" +
-	"\x04data\x18\x03 \x01(\fR\x04data:\x0e\xf0\xa7\x1d\x01\xfa\xa7\x1d\x06socialB?Z=github.com/wxdqing/protoc-gen-go-orm.git/examples/srcb\x06proto3"
+	"\x04data\x18\x03 \x01(\fR\x04data:/\xf0\xa7\x1d\x01\xfa\xa7\x1d\x06social\x80\xa8\x1d\x00\x8a\xa8\x1d\x19idx_lister_rid_id(rid,id)B3Z1github.com/wxdqing/protoc-gen-go-orm/examples/srcb\x06proto3"
 
 var (
 	file_list_proto_rawDescOnce sync.Once

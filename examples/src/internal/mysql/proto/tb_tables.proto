@@ -6,11 +6,39 @@
 syntax = "proto3";
 package mysql;
 
-option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/examples/src/internal/mysql";
+option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/mysql";
 
 
 
 
+// Example 
+// MySQL表结构定义
+message Example {
+  bytes data = 999;
+  int64 created_at = 1000;
+  int64 updated_at = 1001;
+}
 
+// SecondMessage 
+// MySQL表结构定义
+message SecondMessage {
+  bytes data = 999;
+  int64 created_at = 1000;
+  int64 updated_at = 1001;
+}
 
+// ThirdExample 
+// MySQL表结构定义
+message ThirdExample {
+  bytes data = 999;
+  int64 created_at = 1000;
+  int64 updated_at = 1001;
+}
 
+// EmptyFieldMessage 
+// MySQL表结构定义
+message EmptyFieldMessage {
+  bytes data = 999;
+  int64 created_at = 1000;
+  int64 updated_at = 1001;
+}

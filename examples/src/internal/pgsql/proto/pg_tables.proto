@@ -6,11 +6,39 @@
 syntax = "proto3";
 package pgsql;
 
-option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/examples/src/internal/pgsql";
+option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/pgsql";
 
 
 
 
+// Example 
+// PostgreSQL表结构定义
+message Example {
+  bytes data = 999;
+  int64 created_at = 1000;
+  int64 updated_at = 1001;
+}
 
+// SecondMessage 
+// PostgreSQL表结构定义
+message SecondMessage {
+  bytes data = 999;
+  int64 created_at = 1000;
+  int64 updated_at = 1001;
+}
 
+// ThirdExample 
+// PostgreSQL表结构定义
+message ThirdExample {
+  bytes data = 999;
+  int64 created_at = 1000;
+  int64 updated_at = 1001;
+}
 
+// EmptyFieldMessage 
+// PostgreSQL表结构定义
+message EmptyFieldMessage {
+  bytes data = 999;
+  int64 created_at = 1000;
+  int64 updated_at = 1001;
+}

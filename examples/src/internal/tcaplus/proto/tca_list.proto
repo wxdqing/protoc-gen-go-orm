@@ -12,6 +12,8 @@ import "tcaplusservice.optionv1.proto";
 // Tcaplus表结构定义
 message Lister {
   option (tcaplusservice.tcaplus_primary_key) = "rid, id";
+  option (tcaplusservice.tcaplus_index) = "idx_lister_rid_id(rid,id)";
+  
   option (tcaplusservice.tcaplus_index) = "idx_lister_rid(rid)";
   
   option (tcaplusservice.tcaplus_sharding_key) = "rid";

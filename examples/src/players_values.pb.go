@@ -24,6 +24,11 @@ func (x *Player) SetVersion(ver int64) {
 	x.Version = ver
 }
 
+// ShardingKey 供 go-orm 分片路由（orm.ShardingKeyProvider）
+func (x *Player) ShardingKey() int64 {
+	return x.Id
+}
+
 func SetPlayerDefaults(r *Player) {
 	if r == nil {
 		return

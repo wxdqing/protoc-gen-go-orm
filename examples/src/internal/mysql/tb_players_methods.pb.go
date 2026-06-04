@@ -13,7 +13,7 @@ import (
 	reflect "reflect"
 )
 
-import "github.com/wxdqing/protoc-gen-go-orm.git/examples/src"
+import "github.com/wxdqing/protoc-gen-go-orm/examples/src"
 
 // methods for src.Player in mysql
 
@@ -106,6 +106,74 @@ func (m *Player) EncodeFromContext(ctx Context, value proto.Message) error {
 	m.PlayerEnum = int32(r.PlayerEnum)
 	m.Data = r.Data
 	m.Version = r.Version
+	if b, err := marshalProtoFieldToWire(r.ProtoReflect(), "heros"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Heros = b
+	}
+	if r.BaseModel != nil {
+		m.BaseModel = &BaseModel{}
+		if b, err := proto.Marshal(r.BaseModel); err != nil {
+			return err
+		} else if err := proto.Unmarshal(b, m.BaseModel); err != nil {
+			return err
+		}
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "settings"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Settings = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "array"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Array = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "enums"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Enums = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "models"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Models = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "skip_me"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.SkipMe = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "nested"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Nested = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "nesteds"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Nesteds = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "nested_map"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.NestedMap = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "nested2"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Nested2 = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "n2s"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.N2S = b
+	}
+	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "nested2_map"); err != nil {
+		return err
+	} else if len(b) > 0 {
+		m.Nested2Map = b
+	}
 	vp := value.(interface {
 		GetVersion() int64
 	})
@@ -136,6 +204,74 @@ func (m *Player) DecodeToContext(ctx Context, value proto.Message) error {
 	r.PlayerEnum = src.PlayerEnum(m.PlayerEnum)
 	r.Data = m.Data
 	r.Version = m.Version
+	if len(m.Heros) > 0 {
+		if err := unmarshalProtoFieldFromWire(r.ProtoReflect(), "heros", m.Heros); err != nil {
+			return err
+		}
+	}
+	if m.BaseModel != nil {
+		r.BaseModel = &src.BaseModel{}
+		if b, err := proto.Marshal(m.BaseModel); err != nil {
+			return err
+		} else if err := proto.Unmarshal(b, r.BaseModel); err != nil {
+			return err
+		}
+	}
+	if len(m.Settings) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "settings", m.Settings); err != nil {
+			return err
+		}
+	}
+	if len(m.Array) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "array", m.Array); err != nil {
+			return err
+		}
+	}
+	if len(m.Enums) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "enums", m.Enums); err != nil {
+			return err
+		}
+	}
+	if len(m.Models) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "models", m.Models); err != nil {
+			return err
+		}
+	}
+	if len(m.SkipMe) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "skip_me", m.SkipMe); err != nil {
+			return err
+		}
+	}
+	if len(m.Nested) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "nested", m.Nested); err != nil {
+			return err
+		}
+	}
+	if len(m.Nesteds) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "nesteds", m.Nesteds); err != nil {
+			return err
+		}
+	}
+	if len(m.NestedMap) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "nested_map", m.NestedMap); err != nil {
+			return err
+		}
+	}
+	if len(m.Nested2) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "nested2", m.Nested2); err != nil {
+			return err
+		}
+	}
+	if len(m.N2S) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "n2s", m.N2S); err != nil {
+			return err
+		}
+	}
+	if len(m.Nested2Map) > 0 {
+		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "nested2_map", m.Nested2Map); err != nil {
+			return err
+		}
+	}
 	vp := value.(interface {
 		SetVersion(ver int64)
 	})

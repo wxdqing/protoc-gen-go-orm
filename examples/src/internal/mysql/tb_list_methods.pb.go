@@ -13,7 +13,7 @@ import (
 	reflect "reflect"
 )
 
-import "github.com/wxdqing/protoc-gen-go-orm.git/examples/src"
+import "github.com/wxdqing/protoc-gen-go-orm/examples/src"
 
 // methods for src.Lister in mysql
 
