@@ -21,10 +21,10 @@ func generateMetadata(gen *protogen.Plugin, file *protogen.File, messages []Mess
 		}
 	}
 	for _, msg := range messages {
-		if strings.HasPrefix(msg.FilePath, DBTypeTcaplus+"_tb") {
-			dm := directMessages[DBTypeTcaplus]
+		if strings.HasPrefix(msg.FilePath, string(DBTypeTcaplus)+"_tb") {
+			dm := directMessages[string(DBTypeTcaplus)]
 			dm = append(dm, msg)
-			directMessages[DBTypeTcaplus] = dm
+			directMessages[string(DBTypeTcaplus)] = dm
 		}
 	}
 	data := struct {

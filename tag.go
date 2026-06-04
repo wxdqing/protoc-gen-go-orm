@@ -24,13 +24,20 @@ type FieldTag struct {
 	Pk    string `json:"pk"`
 	Index string `json:"index"`
 	JSON  string `json:"json"`
+	Blob  string `json:"blob"`
 }
 
-var defaultFieldTags = map[string]string{
-	//"Id":        `gorm:"column:id;type:bigint;primaryKey;autoIncrement:false"`,
-	"Data":      `gorm:"column:data;type:blob"`,
-	"CreatedAt": `gorm:"column:created_at;autoCreateTime;<-:create"`,
-	"UpdatedAt": `gorm:"column:updated_at;autoUpdateTime"`,
+func defaultFieldTagsForPath(filePath string) map[string]string {
+	dataType := "blob"
+	if strings.Contains(strings.ToLower(filePath), string(DBTypePostgresSQL)) ||
+		strings.Contains(filepath.ToSlash(filePath), "/pgsql/") {
+		dataType = "bytea"
+	}
+	return map[string]string{
+		"Data":      fmt.Sprintf(`gorm:"column:data;type:%s"`, dataType),
+		"CreatedAt": `gorm:"column:created_at;autoCreateTime;<-:create"`,
+		"UpdatedAt": `gorm:"column:updated_at;autoUpdateTime"`,
+	}
 }
 
 func appendGormTags(dir string) error {
@@ -155,7 +162,7 @@ func modifyAST(file *ast.File, info *TagInfo) bool {
 						fmt.Println("failed to unmarshal field tag comment:", err, " struct:", typeSpec.Name.Name, " field:", f.Names[0].Name, " comment:", str)
 						continue
 					}
-					if obj.Pk == "" && obj.Index == "" && obj.JSON == "" {
+					if obj.Pk == "" && obj.Index == "" && obj.JSON == "" && obj.Blob == "" {
 						continue
 					}
 					tagsOfStruct[f.Names[0].Name] = buildGormTag(obj)
@@ -166,7 +173,7 @@ func modifyAST(file *ast.File, info *TagInfo) bool {
 				continue
 			}
 			if hasData && hasCreatedAt && hasUpdatedAt {
-				for k, v := range defaultFieldTags {
+				for k, v := range defaultFieldTagsForPath(info.FilePath) {
 					tagsOfStruct[k] = v
 				}
 			}
@@ -234,6 +241,9 @@ func buildGormTag(tag FieldTag) string {
 	}
 	if tag.JSON != "" {
 		parts = append(parts, tag.JSON)
+	}
+	if tag.Blob != "" {
+		parts = append(parts, tag.Blob)
 	}
 	if len(parts) == 0 {
 		return ""

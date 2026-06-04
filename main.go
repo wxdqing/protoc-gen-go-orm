@@ -79,17 +79,17 @@ func parseFlags() {
 
 	// 自定义用法信息
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `protoc-gen-go-orm.git - ProtoBuf ORM 代码生成插件
+		fmt.Fprintf(os.Stderr, `protoc-gen-go-orm - ProtoBuf ORM 代码生成插件
 
 使用方法:
-  protoc-gen-go-orm.git [选项]
+  protoc-gen-go-orm [选项]
 
 选项:
 `)
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, `
 示例:
-  protoc-gen-go-orm.git -mode=tag -pb-go-dir=./generated -debug
+  protoc-gen-go-orm -mode=tag -pb-go-dir=./generated -debug
 `)
 	}
 

@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
-	"github.com/wxdqing/protoc-gen-go-orm.git/options"
+	"github.com/wxdqing/protoc-gen-go-orm/options"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -117,25 +118,26 @@ type OptionalArray struct {
 
 // MessageOrmOptions 表选项
 type MessageOrmOptions struct {
-	IsTable          bool
-	TableName        OptionalString
-	NodeType         OptionalString
-	TableStoreMode   options.TableStoreMode
-	HasPrimaryKey    bool
-	HasIndexes       bool
-	HasShardingKey   bool
-	HasVersion       bool
-	ShardingKeyField OptionalValue
+	IsTable             bool
+	TableName           OptionalString
+	NodeType            OptionalString
+	TableStoreMode      options.TableStoreMode
+	HasPrimaryKey       bool
+	HasIndexes          bool
+	HasShardingKey      bool
+	HasVersion          bool
+	ShardingKeyField    OptionalValue
+	CompositeIndexSpecs []string // (orm.composite_index)，如 idx_pk(rid,id)
 }
 
 type FieldOrmOptions struct {
-	// Deprecated: not implemented
-	GormDeclared   bool
 	HasPrimaryKey  bool
 	HasIndex       bool
 	HasShardingKey bool
 	HasVersion     bool
-	IsJSONField    bool
+	IsJSONField      bool
+	IsBlobField      bool
+	IsEmbeddedField  bool
 }
 
 // generateFile 生成文件
@@ -173,8 +175,33 @@ func generateFiles(gen *protogen.Plugin, file *protogen.File, cb func([]MessageD
 	return nil
 }
 
+// warnFieldsModeOnKV 在 redis/mongo 上生成 FIELDS 表时提示：KV 仅支持 PAYLOAD。
+func warnFieldsModeOnKV(sourcePath string, msg *MessageDesc, dbType DBType) {
+	if msg == nil || !dbType.IsKV() {
+		return
+	}
+	if !msg.OrmOptions.IsTable {
+		return
+	}
+	if msg.OrmOptions.TableStoreMode != options.TableStoreMode_TABLE_STORE_MODE_FIELDS {
+		return
+	}
+	if sourcePath == "" {
+		sourcePath = "?"
+	}
+	fmt.Fprintf(os.Stderr,
+		"%s: warning: table %q uses TABLE_STORE_MODE_FIELDS for %s; KV drivers only support PAYLOAD (pk/index/version + data). Generated code uses kv.tmpl.\n",
+		sourcePath, msg.Name, dbType,
+	)
+}
+
 // generateForDBType 为特定数据库类型生成文件
 func generateForDBType(gen *protogen.Plugin, file *protogen.File, messages []MessageDesc, enums []EnumDesc, dbType DBType) error {
+	for _, msg := range messages {
+		if msg.OrmOptions.IsTable {
+			warnFieldsModeOnKV(file.Desc.Path(), &msg, dbType)
+		}
+	}
 
 	// 过滤出需要生成的消息
 	//var filteredMessages []MessageDesc
@@ -224,16 +251,11 @@ func generateForDBType(gen *protogen.Plugin, file *protogen.File, messages []Mes
 	//	return fmt.Errorf("parse func template failed: %w", err)
 	//}
 
-	// 解析数据库特定模板
-	var dbTemplate string
-	switch dbType {
-	case DBTypeMySQL:
-		dbTemplate = mysqlTemplate
-	case DBTypeTcaplus:
-		dbTemplate = tcaplusTemplate
-	case DBTypePostgresSQL:
-		dbTemplate = pgsqlTemplate
-	default:
+	if err := dbType.Validate(); err != nil {
+		return err
+	}
+	dbTemplate := dbType.TemplateName()
+	if dbTemplate == "" {
 		return fmt.Errorf("unsupported db type: %s", dbType)
 	}
 
@@ -452,7 +474,9 @@ func collectFields(msg *protogen.Message, cb ...func(fd *FieldDesc)) ([]FieldDes
 			for _, ft := range fts {
 				ft(&fieldDesc)
 			}
+			fieldDesc.OrmOptions.IsEmbeddedField = isEmbeddedField(fieldDesc)
 			fieldDesc.OrmOptions.IsJSONField = isJSONDBField(fieldDesc)
+			fieldDesc.OrmOptions.IsBlobField = hasBlobTag(fieldDesc)
 		}
 
 		// 获取Tcaplus类型
@@ -545,27 +569,47 @@ func parseTcaplusOptions(msg *protogen.Message) []func(desc *MessageDesc) {
 }
 
 func parseOrmOptionsFromMessage(msg *protogen.Message) []func(desc *MessageDesc) {
+	return messageOrmOptionAppliers(msg.Desc.Options())
+}
+
+func applyOrmMessageOptions(desc *MessageDesc, msgOpts protoreflect.ProtoMessage) {
+	for _, fn := range messageOrmOptionAppliers(msgOpts) {
+		fn(desc)
+	}
+}
+
+func messageOrmOptionAppliers(msgOpts protoreflect.ProtoMessage) []func(desc *MessageDesc) {
 	fns := make([]func(desc *MessageDesc), 0)
-	if opt := proto.GetExtension(msg.Desc.Options(), options.E_Table); opt != nil {
-		//opts["orm.table"] = fmt.Sprintf("%t", *opt.(*bool))
+	if opt := proto.GetExtension(msgOpts, options.E_Table); opt != nil {
 		fns = append(fns, func(desc *MessageDesc) {
 			desc.OrmOptions.IsTable = opt.(bool)
 		})
 	}
-	if proto.HasExtension(msg.Desc.Options(), options.E_NodeType) {
-		opt := proto.GetExtension(msg.Desc.Options(), options.E_NodeType)
+	if proto.HasExtension(msgOpts, options.E_NodeType) {
+		opt := proto.GetExtension(msgOpts, options.E_NodeType)
 		if s := opt.(string); s != "" {
 			fns = append(fns, func(desc *MessageDesc) {
 				desc.OrmOptions.NodeType = OptionalString{Value: stringEscape(s), Valid: true}
 			})
 		}
 	}
-	if proto.HasExtension(msg.Desc.Options(), options.E_TableStoreMode) {
-		opt := proto.GetExtension(msg.Desc.Options(), options.E_TableStoreMode)
+	if proto.HasExtension(msgOpts, options.E_TableStoreMode) {
+		opt := proto.GetExtension(msgOpts, options.E_TableStoreMode)
 		mode := opt.(options.TableStoreMode)
 		fns = append(fns, func(desc *MessageDesc) {
 			desc.OrmOptions.TableStoreMode = mode
 		})
+	}
+	if proto.HasExtension(msgOpts, options.E_CompositeIndex) {
+		opt := proto.GetExtension(msgOpts, options.E_CompositeIndex)
+		if arr, ok := opt.([]string); ok && len(arr) > 0 {
+			specs := make([]string, len(arr))
+			copy(specs, arr)
+			fns = append(fns, func(desc *MessageDesc) {
+				desc.OrmOptions.CompositeIndexSpecs = specs
+				desc.OrmOptions.HasIndexes = true
+			})
+		}
 	}
 	return fns
 }
@@ -838,12 +882,6 @@ func parseOrmFieldOptions(field *protogen.Field) []func(desc *FieldDesc) {
 		if s := opt.(string); s != "" {
 			fns = append(fns, func(desc *FieldDesc) {
 				desc.Tags = OptionalString{Value: stringEscape(s), Valid: true}
-				// if contains primary_key; or index: or unique_index: , case-insensitive
-				declared := false
-				if strings.Contains(strings.ToLower(s), "gorm:") {
-					declared = true
-				}
-				desc.OrmOptions.GormDeclared = declared
 				//if strings.Contains(strings.ToLower(s), "primary_key") ||
 				//	strings.Contains(strings.ToLower(s), "primarykey") {
 				//	desc.OrmOptions.HasPrimaryKey = true

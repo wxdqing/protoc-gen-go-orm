@@ -90,20 +90,37 @@ func generateContext(gen *protogen.Plugin, file *protogen.File, dbType DBType) e
 	generatedContextFiles[dbType] = true
 	filename := fmt.Sprintf("internal/%s/orm_context.pb.go", dbType)
 	g := gen.NewGeneratedFile(filename, file.GoImportPath)
-	tmpl := template.New("context").Funcs(funcMap)
-	tmpl, err := tmpl.Parse(contextTemplate)
+	hooksTmpl, err := template.New("context").Funcs(funcMap).Parse(contextTemplate)
 	if err != nil {
-		return fmt.Errorf("parse context template failed: %w", err)
+		return fmt.Errorf("parse context hooks template failed: %w", err)
 	}
-	buf := new(bytes.Buffer)
-	if err := tmpl.Execute(buf, nil); err != nil {
-		return fmt.Errorf("execute context template failed: %w", err)
+	codecTmpl, err := template.New("codec").Funcs(funcMap).Parse(jsonCodecTemplate)
+	if err != nil {
+		return fmt.Errorf("parse json codec template failed: %w", err)
+	}
+	var hooksBuf, codecBuf bytes.Buffer
+	if err := hooksTmpl.Execute(&hooksBuf, nil); err != nil {
+		return fmt.Errorf("execute context hooks template failed: %w", err)
+	}
+	if err := codecTmpl.Execute(&codecBuf, nil); err != nil {
+		return fmt.Errorf("execute json codec template failed: %w", err)
 	}
 	generateHeader(gen, g, file, dbType)
 	g.P("package ", dbType)
 	g.P("")
-	g.QualifiedGoIdent(protoPackage.Ident(""))
+	g.P("import (")
+	g.P(`"bytes"`)
+	g.P(`"encoding/json"`)
+	g.P(`"fmt"`)
+	g.P(`"strings"`)
+	g.P(`"google.golang.org/protobuf/encoding/protojson"`)
+	g.P(`"google.golang.org/protobuf/encoding/protowire"`)
+	g.P(`"google.golang.org/protobuf/proto"`)
+	g.P(`"google.golang.org/protobuf/reflect/protoreflect"`)
+	g.P(")")
 	g.P("")
-	g.P(strings.Trim(buf.String(), "\r\n"))
+	g.P(strings.Trim(hooksBuf.String(), "\r\n"))
+	g.P("")
+	g.P(strings.Trim(codecBuf.String(), "\r\n"))
 	return nil
 }

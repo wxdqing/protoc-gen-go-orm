@@ -6,6 +6,10 @@ import (
 	"testing"
 	"text/template"
 	"time"
+
+	"github.com/wxdqing/protoc-gen-go-orm/options"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 func TestCamelCase(t *testing.T) {
@@ -87,18 +91,71 @@ func TestDefaultNodeType(t *testing.T) {
 	}
 }
 
-func TestDBTypesIncludesPostgresSQL(t *testing.T) {
+func newMessageDescWithOrmDefaults() *MessageDesc {
+	return &MessageDesc{
+		OrmOptions: MessageOrmOptions{
+			NodeType:       OptionalString{Value: defaultNodeType(), Valid: true},
+			TableStoreMode: options.TableStoreMode_TABLE_STORE_MODE_PAYLOAD,
+		},
+	}
+}
+
+func TestExplicitNodeTypeParsing(t *testing.T) {
+	msgOpts := &descriptorpb.MessageOptions{}
+	proto.SetExtension(msgOpts, options.E_Table, true)
+	proto.SetExtension(msgOpts, options.E_NodeType, "game")
+
+	desc := newMessageDescWithOrmDefaults()
+	applyOrmMessageOptions(desc, msgOpts)
+
+	if !desc.OrmOptions.IsTable {
+		t.Fatal("expected IsTable=true")
+	}
+	if !desc.OrmOptions.NodeType.Valid || desc.OrmOptions.NodeType.Value != "game" {
+		t.Fatalf("node type = %#v, want game", desc.OrmOptions.NodeType)
+	}
+}
+
+func TestTableStoreModeParsing(t *testing.T) {
+	msgOpts := &descriptorpb.MessageOptions{}
+	proto.SetExtension(msgOpts, options.E_TableStoreMode, options.TableStoreMode_TABLE_STORE_MODE_FIELDS)
+
+	desc := newMessageDescWithOrmDefaults()
+	applyOrmMessageOptions(desc, msgOpts)
+
+	if desc.OrmOptions.TableStoreMode != options.TableStoreMode_TABLE_STORE_MODE_FIELDS {
+		t.Fatalf("table store mode = %v, want FIELDS", desc.OrmOptions.TableStoreMode)
+	}
+}
+
+func TestDBTypesIncludesAllDrivers(t *testing.T) {
 	dbTypes := supportedDBTypes()
 	want := map[DBType]bool{
 		DBTypeMySQL:       true,
 		DBTypeTcaplus:     true,
 		DBTypePostgresSQL: true,
+		DBTypeRedis:       true,
+		DBTypeMongo:       true,
 	}
 	for _, typ := range dbTypes {
 		delete(want, typ)
 	}
 	if len(want) != 0 {
 		t.Fatalf("missing db types: %#v", want)
+	}
+}
+
+func TestHasBlobTagSkipsJSONClassification(t *testing.T) {
+	f := FieldDesc{
+		Type: "bytes",
+		List: true,
+		Tags: OptionalString{Value: `gorm:"type:blob"`, Valid: true},
+	}
+	if !hasBlobTag(f) {
+		t.Fatal("hasBlobTag = false, want true")
+	}
+	if isJSONDBField(f) {
+		t.Fatal("blob tag field should not be JSON field")
 	}
 }
 
@@ -121,6 +178,36 @@ func TestFieldJSONClassification(t *testing.T) {
 				t.Fatalf("isJSONDBField(%#v) = %v, want %v", tt.f, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestShardingKeyExpr(t *testing.T) {
+	if got := shardingKeyExpr(FieldDesc{Name: "id", Type: "int64"}); got != "x.Id" {
+		t.Fatalf("int64 = %q", got)
+	}
+	if got := shardingKeyExpr(FieldDesc{Name: "rid", Type: "uint32"}); got != "int64(x.Rid)" {
+		t.Fatalf("uint32 = %q", got)
+	}
+}
+
+func TestContextTemplateIncludesJSONCodec(t *testing.T) {
+	codecTmpl := template.Must(template.New("codec").Funcs(funcMap).Parse(jsonCodecTemplate))
+	var buf bytes.Buffer
+	if err := codecTmpl.Execute(&buf, nil); err != nil {
+		t.Fatalf("execute: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{
+		"func marshalProtoFieldToJSON",
+		"func unmarshalProtoFieldFromJSON",
+		"func marshalProtoFieldToWire",
+		"func unmarshalProtoFieldFromWire",
+		"func unmarshalProtoListWire",
+		"protowire.AppendVarint",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("missing %q in context output", want)
+		}
 	}
 }
 
@@ -175,6 +262,58 @@ func TestMethodsTemplateIncludesContextMethods(t *testing.T) {
 	}
 }
 
+func TestMetadataTemplateIncludesNodeTableHelpers(t *testing.T) {
+	tmpl := template.Must(template.New("metadata").Funcs(funcMap).Parse(metadataTemplate))
+	data := struct {
+		Version        string
+		ProtocVersion  string
+		Package        string
+		GoPackage      string
+		Messages       []MessageDesc
+		DirectMessages map[string][]MessageDesc
+		DBTypes        []DBType
+		Source         string
+		Enums          []EnumDesc
+	}{
+		Package: "src",
+		Messages: []MessageDesc{
+			{
+				Name: "Player",
+				OrmOptions: MessageOrmOptions{
+					IsTable:  true,
+					NodeType: OptionalString{Value: "game", Valid: true},
+				},
+			},
+			{
+				Name: "Lister",
+				OrmOptions: MessageOrmOptions{
+					IsTable:  true,
+					NodeType: OptionalString{Value: "social", Valid: true},
+				},
+			},
+		},
+		DirectMessages: map[string][]MessageDesc{},
+		DBTypes:        supportedDBTypes(),
+	}
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		t.Fatalf("execute metadata template: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{
+		`var NodeTables = make(map[string]map[string][]proto.Message)`,
+		`func GetAllTables(dbType string) []proto.Message`,
+		`func GetNodeTables(dbType string, nodeType string) []proto.Message`,
+		`NodeTables["mysql"]["game"]`,
+		`NodeTables["pgsql"]["social"]`,
+		`Tables["tcaplus"]`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("metadata template missing %q in:\n%s", want, out)
+		}
+	}
+}
+
 func TestBuildGormTagFromFieldTagIncludesJSON(t *testing.T) {
 	tag := buildGormTag(FieldTag{
 		Pk:    "primary_key;column:id",
@@ -182,6 +321,63 @@ func TestBuildGormTagFromFieldTagIncludesJSON(t *testing.T) {
 		JSON:  "type:json;column:profile",
 	})
 	want := `gorm:"primary_key;column:id;index:idx_id;column:id;type:json;column:profile"`
+	if tag != want {
+		t.Fatalf("buildGormTag() = %q, want %q", tag, want)
+	}
+}
+
+func TestDBTypeHelpers(t *testing.T) {
+	if !DBTypeRedis.IsKV() || !DBTypeMongo.IsKV() {
+		t.Fatal("redis/mongo should be KV")
+	}
+	if DBTypeMySQL.IsKV() || DBTypePostgresSQL.IsKV() {
+		t.Fatal("mysql/pgsql should not be KV")
+	}
+	if !DBTypeMySQL.IsSQL() || !DBTypePostgresSQL.IsSQL() {
+		t.Fatal("mysql/pgsql should be SQL")
+	}
+	if DBTypeRedis.IsSQL() {
+		t.Fatal("redis should not be SQL")
+	}
+	for _, dt := range supportedDBTypes() {
+		if err := dt.Validate(); err != nil {
+			t.Fatalf("Validate(%s): %v", dt, err)
+		}
+		if dt.TemplateName() == "" {
+			t.Fatalf("TemplateName(%s) empty", dt)
+		}
+	}
+	if err := DBType("unknown").Validate(); err == nil {
+		t.Fatal("unknown db type should fail Validate")
+	}
+}
+
+func TestIsEmbeddedField(t *testing.T) {
+	f := FieldDesc{Tags: OptionalString{Value: `gorm:"embedded"`, Valid: true}}
+	if !isEmbeddedField(f) {
+		t.Fatal("expected embedded")
+	}
+	if isJSONDBField(f) {
+		t.Fatal("embedded must not be JSON field")
+	}
+	if getDBFieldType(f) != f.Type {
+		f.Type = "BaseModel"
+		if getDBFieldType(f) != "BaseModel" {
+			t.Fatalf("getDBFieldType = %q", getDBFieldType(f))
+		}
+	}
+}
+
+func TestTemplateFail(t *testing.T) {
+	_, err := templateFail("bad option")
+	if err == nil || err.Error() != "bad option" {
+		t.Fatalf("templateFail() = %v", err)
+	}
+}
+
+func TestBuildGormTagFromFieldTagIncludesBlob(t *testing.T) {
+	tag := buildGormTag(FieldTag{Blob: "type:bytea;column:heros"})
+	want := `gorm:"type:bytea;column:heros"`
 	if tag != want {
 		t.Fatalf("buildGormTag() = %q, want %q", tag, want)
 	}

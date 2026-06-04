@@ -17,9 +17,11 @@ type DBType string
 
 // DBType 数据库类型
 const (
-	DBTypeMySQL       = "mysql"
-	DBTypeTcaplus     = "tcaplus"
-	DBTypePostgresSQL = "pgsql"
+	DBTypeMySQL       DBType = "mysql"
+	DBTypeTcaplus     DBType = "tcaplus"
+	DBTypePostgresSQL DBType = "pgsql"
+	DBTypeRedis       DBType = "redis"
+	DBTypeMongo       DBType = "mongo"
 
 	timePackage         = protogen.GoImportPath("time")
 	errorsPackage       = protogen.GoImportPath("errors")
@@ -31,7 +33,7 @@ const (
 
 	outputBaseInternalDir        = "internal"
 	outputProtoDir               = "proto"
-	outputTcaplusOptionProtoFile = outputBaseInternalDir + "/" + DBTypeTcaplus + "/" + outputProtoDir + "/tcaplusservice.optionv1.proto"
+	outputTcaplusOptionProtoFile = outputBaseInternalDir + "/" + string(DBTypeTcaplus) + "/" + outputProtoDir + "/tcaplusservice.optionv1.proto"
 )
 
 var funcMap = template.FuncMap{
@@ -55,9 +57,12 @@ var funcMap = template.FuncMap{
 	"IsZeroValue":         isZeroValue,
 	"JoinPk":              joinFieldsPk,
 	"JoinIndex":           joinFieldsIndex,
+	"IndexTag":            indexTagForField,
 	"IsJSONDBField":       isJSONDBField,
+	"IsEmbeddedField":     isEmbeddedField,
 	"IsEnumDBField":       isEnumDBField,
 	"getDBFieldType":      getDBFieldType,
+	"fail":                templateFail,
 	"add":                 func(a, b int32) int32 { return a + b },
 	"dict": func(values ...interface{}) map[string]interface{} {
 		if len(values)%2 != 0 {
@@ -73,6 +78,27 @@ var funcMap = template.FuncMap{
 		}
 		return dict
 	},
+	"ShardingKeyExpr": shardingKeyExprFromAny,
+}
+
+func shardingKeyExprFromAny(v interface{}) string {
+	f, ok := v.(FieldDesc)
+	if !ok {
+		return "0"
+	}
+	return shardingKeyExpr(f)
+}
+
+func shardingKeyExpr(f FieldDesc) string {
+	field := "x." + toCamelCase(f.Name)
+	switch f.Type {
+	case "int64":
+		return field
+	case "int32", "uint32", "uint64":
+		return "int64(" + field + ")"
+	default:
+		return "int64(" + field + ")"
+	}
 }
 
 func (t DBType) Suffix() string {
@@ -83,6 +109,10 @@ func (t DBType) Suffix() string {
 		return "tb_"
 	case DBTypePostgresSQL:
 		return "pg_"
+	case DBTypeRedis:
+		return "rd_"
+	case DBTypeMongo:
+		return "mg_"
 	}
 	return ""
 }
@@ -95,21 +125,69 @@ func (t DBType) TemplateName() string {
 		return mysqlTemplate
 	case DBTypePostgresSQL:
 		return pgsqlTemplate
+	case DBTypeRedis, DBTypeMongo:
+		return kvTemplate
 	}
 	return ""
 }
 
-// TODO dbType关联逻辑封装
+// IsKV 是否为 KV 驱动（redis / mongo），仅支持 PAYLOAD 整包存储。
+func (t DBType) IsKV() bool {
+	return t == DBTypeRedis || t == DBTypeMongo
+}
+
+// IsSQL 是否为 GORM SQL 驱动（mysql / pgsql）。
+func (t DBType) IsSQL() bool {
+	return t == DBTypeMySQL || t == DBTypePostgresSQL
+}
+
+// Validate 校验插件支持的 dbType。
+func (t DBType) Validate() error {
+	switch t {
+	case DBTypeMySQL, DBTypeTcaplus, DBTypePostgresSQL, DBTypeRedis, DBTypeMongo:
+		return nil
+	default:
+		return fmt.Errorf("unsupported db type: %s", t)
+	}
+}
 
 func supportedDBTypes() []DBType {
-	return []DBType{DBTypeMySQL, DBTypeTcaplus, DBTypePostgresSQL}
+	return []DBType{DBTypeMySQL, DBTypeTcaplus, DBTypePostgresSQL, DBTypeRedis, DBTypeMongo}
+}
+
+// hasBlobTag 字段含 gorm type:blob 时走 protobuf 二进制列，而非 JSON 列编解码。
+func hasBlobTag(field FieldDesc) bool {
+	if !field.Tags.Valid {
+		return false
+	}
+	return strings.Contains(strings.ToLower(field.Tags.Value), "type:blob")
 }
 
 func defaultNodeType() string {
 	return "default"
 }
 
+func templateFail(args ...any) (string, error) {
+	if len(args) == 0 {
+		return "", fmt.Errorf("template fail")
+	}
+	return "", fmt.Errorf("%v", args[0])
+}
+
+func isEmbeddedField(field FieldDesc) bool {
+	if !field.Tags.Valid {
+		return false
+	}
+	return strings.Contains(strings.ToLower(field.Tags.Value), "embedded")
+}
+
 func isJSONDBField(field FieldDesc) bool {
+	if isEmbeddedField(field) {
+		return false
+	}
+	if hasBlobTag(field) {
+		return false
+	}
 	if field.List {
 		return true
 	}
@@ -136,7 +214,10 @@ func isJSONDBField(field FieldDesc) bool {
 }
 
 func getDBFieldType(field FieldDesc) string {
-	if isJSONDBField(field) {
+	if isEmbeddedField(field) {
+		return field.Type
+	}
+	if isJSONDBField(field) || hasBlobTag(field) {
 		return "bytes"
 	}
 	if isEnumDBField(field) {
@@ -296,19 +377,3 @@ func joinFieldsPk(msg *MessageDesc) string {
 	return strings.Join(pkFields, ", ")
 }
 
-func joinFieldsIndex(msg *MessageDesc) []string {
-	var indexFields []string
-	for _, field := range msg.Fields {
-		if field.OrmOptions.HasIndex {
-			skf := msg.OrmOptions.ShardingKeyField.Value.(FieldDesc)
-			sk := skf.Name + ","
-			if skf.Name == field.Name { // 索引字段本身就是分表字段，则不需要重复添加
-				sk = ""
-			}
-			indexFields = append(indexFields, fmt.Sprintf("idx_%s_%s(%s%s)", toSnakeCase(msg.Name), field.Name, sk, field.Name))
-		}
-	}
-	//idxs := strings.Join(indexFields, ", ")
-	//return fmt.Sprintf("idx_%s(%s)", toSnakeCase(msg.Name), idxs) // TODO 支持多个联合索引定义（目前只有独立索引）
-	return indexFields
-}
