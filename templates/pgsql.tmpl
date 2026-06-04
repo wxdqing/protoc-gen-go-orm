@@ -10,6 +10,9 @@ option go_package = "{{.GoImportPath}}/internal/{{.DBType}}";
 
 {{- range .Messages}}
 {{if .OrmOptions.IsTable}}{{template "message" .}}{{end}}
+{{- end}}
+{{- range .Messages}}
+{{if not .OrmOptions.IsTable}}{{template "message" .}}{{end}}
 {{ end -}}
 
 {{- define "message" -}}
@@ -29,8 +32,8 @@ message {{.Name}} {
 {{- end -}}
 
 {{- define "field" -}}{{- $m := .M -}}{{- $f := .F -}}
-{{if or (eq $m.OrmOptions.TableStoreMode 1) ($f.OrmOptions.HasPrimaryKey)  ($f.OrmOptions.HasIndex) ($f.OrmOptions.HasVersion) -}}
+{{if or (eq $m.OrmOptions.TableStoreMode 1) ($f.OrmOptions.HasPrimaryKey)  ($f.OrmOptions.HasIndex) (IndexTag $m $f) ($f.OrmOptions.HasVersion) (IsEmbeddedField $f) -}}
 {{- if $f.Comment -}}// {{$f.Comment}}{{- end }}
-{{getDBFieldType $f}} {{$f.Name}} = {{$f.Number}}; //{ {{if $f.OrmOptions.IsJSONField}}"json":"type:jsonb;column:{{ToSnakeCase $f.Name}}",{{end}} "origin":"{{$f.Name}}" }
+{{getDBFieldType $f}} {{$f.Name}} = {{$f.Number}}; //{ {{if IndexTag $m $f}}"index":"index:{{IndexTag $m $f}}",{{end}} {{if IsEmbeddedField $f}}"embedded":"embedded",{{else if $f.OrmOptions.IsJSONField}}"json":"type:jsonb;column:{{ToSnakeCase $f.Name}};serializer:json",{{end}} {{if $f.OrmOptions.IsBlobField}}"blob":"type:bytea;column:{{ToSnakeCase $f.Name}}",{{end}} "origin":"{{$f.Name}}" }
 {{- end}}
 {{- end -}}

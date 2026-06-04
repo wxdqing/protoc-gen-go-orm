@@ -19,6 +19,9 @@ var tcaplusTemplate string
 //go:embed templates/pgsql.tmpl
 var pgsqlTemplate string
 
+//go:embed templates/kv.tmpl
+var kvTemplate string
+
 // po 函数模板
 //
 //go:embed templates/methods.tmpl
@@ -28,6 +31,10 @@ var methodsTemplate string
 //
 //go:embed templates/context.tmpl
 var contextTemplate string
+
+//go:embed templates/json_codec.tmpl
+var jsonCodecTemplate string
+
 
 // 通用元数据模板
 //

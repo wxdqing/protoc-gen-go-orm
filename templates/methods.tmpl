@@ -87,14 +87,38 @@ func (m *{{.Name}}) EncodeFromContext(ctx Context, value proto.Message) error {
         }
     }
     r := value.(*{{$pkg}}.{{.Name}})
-    {{if and (eq .OrmOptions.TableStoreMode 1) (ne $dbType "tcaplus") -}}
+    {{if and (eq .OrmOptions.TableStoreMode 1) (ne $dbType "tcaplus") (ne $dbType "redis") (ne $dbType "mongo") -}}
     {{range .Fields -}}
-    {{if not .OrmOptions.IsJSONField -}}
+    {{if and (not .OrmOptions.IsJSONField) (not .OrmOptions.IsBlobField) (not .OrmOptions.IsEmbeddedField) -}}
     {{if IsEnumDBField . -}}
     m.{{ToCamelCase .Name}} = int32(r.{{ToCamelCase .Name}})
     {{else -}}
     m.{{ToCamelCase .Name}} = r.{{ToCamelCase .Name}}
     {{end -}}
+    {{end -}}
+    {{end -}}
+    {{range .Fields -}}
+    {{if .OrmOptions.IsEmbeddedField -}}
+    if r.{{ToCamelCase .Name}} != nil {
+        m.{{ToCamelCase .Name}} = &{{.Type}}{}
+        if b, err := proto.Marshal(r.{{ToCamelCase .Name}}); err != nil {
+            return err
+        } else if err := proto.Unmarshal(b, m.{{ToCamelCase .Name}}); err != nil {
+            return err
+        }
+    }
+    {{else if .OrmOptions.IsBlobField -}}
+    if b, err := marshalProtoFieldToWire(r.ProtoReflect(), {{printf "%q" .Name}}); err != nil {
+        return err
+    } else if len(b) > 0 {
+        m.{{ToCamelCase .Name}} = b
+    }
+    {{else if .OrmOptions.IsJSONField -}}
+    if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), {{printf "%q" .Name}}); err != nil {
+        return err
+    } else if len(b) > 0 {
+        m.{{ToCamelCase .Name}} = b
+    }
     {{end -}}
     {{end -}}
     {{else -}}
@@ -134,15 +158,39 @@ func (m *{{.Name}}) DecodeToContext(ctx Context, value proto.Message) error {
             return err
         }
     }
-    {{if and (eq .OrmOptions.TableStoreMode 1) (ne $dbType "tcaplus") -}}
+    {{if and (eq .OrmOptions.TableStoreMode 1) (ne $dbType "tcaplus") (ne $dbType "redis") (ne $dbType "mongo") -}}
     r := value.(*{{$pkg}}.{{.Name}})
     {{range .Fields -}}
-    {{if not .OrmOptions.IsJSONField -}}
+    {{if and (not .OrmOptions.IsJSONField) (not .OrmOptions.IsBlobField) (not .OrmOptions.IsEmbeddedField) -}}
     {{if IsEnumDBField . -}}
     r.{{ToCamelCase .Name}} = {{$pkg}}.{{getFieldType .F}}(m.{{ToCamelCase .Name}})
     {{else -}}
     r.{{ToCamelCase .Name}} = m.{{ToCamelCase .Name}}
     {{end -}}
+    {{end -}}
+    {{end -}}
+    {{range .Fields -}}
+    {{if .OrmOptions.IsEmbeddedField -}}
+    if m.{{ToCamelCase .Name}} != nil {
+        r.{{ToCamelCase .Name}} = &{{$pkg}}.{{.Type}}{}
+        if b, err := proto.Marshal(m.{{ToCamelCase .Name}}); err != nil {
+            return err
+        } else if err := proto.Unmarshal(b, r.{{ToCamelCase .Name}}); err != nil {
+            return err
+        }
+    }
+    {{else if .OrmOptions.IsBlobField -}}
+    if len(m.{{ToCamelCase .Name}}) > 0 {
+        if err := unmarshalProtoFieldFromWire(r.ProtoReflect(), {{printf "%q" .Name}}, m.{{ToCamelCase .Name}}); err != nil {
+            return err
+        }
+    }
+    {{else if .OrmOptions.IsJSONField -}}
+    if len(m.{{ToCamelCase .Name}}) > 0 {
+        if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), {{printf "%q" .Name}}, m.{{ToCamelCase .Name}}); err != nil {
+            return err
+        }
+    }
     {{end -}}
     {{end -}}
     {{else -}}

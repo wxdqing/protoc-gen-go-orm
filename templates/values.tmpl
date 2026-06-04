@@ -17,6 +17,13 @@ func (x *{{.Name}}) SetVersion(ver int64) {
 }
 {{- end}}
 
+{{- if and .OrmOptions.IsTable .OrmOptions.HasShardingKey .OrmOptions.ShardingKeyField.Valid }}
+// ShardingKey 供 go-orm 分片路由（orm.ShardingKeyProvider）
+func (x *{{.Name}}) ShardingKey() int64 {
+	return {{ShardingKeyExpr .OrmOptions.ShardingKeyField.Value}}
+}
+{{- end }}
+
 {{template "defaults" (dict "G" $g "M" .)}}
 {{- end}}
 
