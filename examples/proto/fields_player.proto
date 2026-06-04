@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package src;
+
+import "orm.option.proto";
+import "players.proto";
+
+option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src";
+
+// 独立表名 fields_player，避免与 gs 示例 PAYLOAD 表 player 混用同一物理表。
+message FieldsPlayer {
+  option (orm.table) = true;
+  option (orm.node_type) = "game";
+  option (orm.table_store_mode) = TABLE_STORE_MODE_FIELDS;
+
+  int64 id = 1 [(orm.primary_key) = true];
+  string name = 2 [(orm.index) = true];
+  int32 level = 3;
+  int64 exp = 4;
+  repeated Hero heros = 5 [(orm.tags) = "gorm:\"type:blob\""];
+  map<string, int32> settings = 7;
+  PlayerEnum player_enum = 9;
+}

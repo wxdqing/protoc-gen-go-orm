@@ -4,7 +4,7 @@ package src;
 
 import "orm.option.proto";
 
-option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/examples/src";
+option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src";
 
 message Player {
   option (orm.table) = true;

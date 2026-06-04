@@ -4,7 +4,7 @@ package src;
 
 import "orm.option.proto";
 
-option go_package = "github.com/wxdqing/protoc-gen-go-orm.git/examples/src";
+option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src";
 
 message Example {
   string with_new_tags = 1 [(orm.tags) = "graphql:\"withNewTags,optional\"" ];
