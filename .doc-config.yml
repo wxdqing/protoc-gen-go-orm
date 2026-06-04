@@ -1,7 +1,0 @@
-enabled: true
-name: "protoc-gen-go-orm" # 在文档系统展示的名称
-detail: "持久层代码生成工具，旨在使用gkit-orm模块时，为其提供统一的、规范的代码生成工具。"
-root:
-  src: "."
-  files:
-    - src: "README.md" # 这里指定了刚刚的README.md文件
