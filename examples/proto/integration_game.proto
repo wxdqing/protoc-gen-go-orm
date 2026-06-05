@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package src;
+
+import "orm.option.proto";
+import "players.proto";
+
+option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src";
+
+message RoleHero {
+  int64 id = 1;
+  int32 cid = 2;
+  int32 hero_level = 3;
+}
+
+message RoleTimestamps {
+  int64 created_at = 1 [(orm.tags) = "gorm:\"autoCreateTime;<-:create\""];
+  int64 updated_at = 2 [(orm.tags) = "gorm:\"autoUpdateTime\""];
+}
+
+// 集成测专用：复合主键 + 联合索引 + FIELDS 展开 + embed + blob/json。
+message GameRole {
+  option (orm.table) = true;
+  option (orm.node_type) = "game";
+  option (orm.table_store_mode) = TABLE_STORE_MODE_FIELDS;
+  option (orm.composite_index) = "idx_game_role_server_name(server_id,name)";
+  option (orm.composite_index) = "idx_game_role_server_level(server_id,level)";
+
+  int64 server_id = 1 [(orm.primary_key) = true];
+  int64 role_id = 2 [(orm.primary_key) = true];
+  string name = 3 [(orm.index) = true, (orm.tags) = "gorm:\"size:128;not null\""];
+  int32 level = 4;
+  int64 exp = 5;
+  repeated RoleHero heros = 6 [(orm.tags) = "gorm:\"type:blob\""];
+  RoleTimestamps timestamps = 7 [(orm.tags) = "gorm:\"embedded\""];
+  map<string, int32> settings = 8;
+  PlayerEnum player_enum = 9;
+  bytes profile = 10 [(orm.tags) = "json:\"profile\""];
+  int64 version = 11;
+}

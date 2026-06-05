@@ -27,11 +27,19 @@ build:
 install:
 	$(GO_INSTALL) $(ROOT_DIR)
 
-# 运行测试
+# 运行单元测试
 .PHONY: test
 test:
-	@echo "Running tests..."
-	@$(GO) run $(ROOT_DIR) --go_out=./testoutput --go-orm_out=./testoutput $(TEST_DATA_DIR)/test.proto
+	$(GO_TEST) ./... -count=1
+
+# 生成 examples 并跑 MySQL/PG 集成测（需本地 game 库，-tags=db）
+.PHONY: gen-examples
+gen-examples: install
+	cd examples && bash build.sh
+
+.PHONY: test-integration-db
+test-integration-db: gen-examples
+	cd examples/src && $(GO_TEST) -tags=db -run TestIntegration_Complex -count=1 -v
 
 # 清理编译产物
 .PHONY: clean
@@ -46,7 +54,9 @@ help:
 	@echo "Targets:"
 	@echo "  build     编译插件"
 	@echo "  install   安装插件到GOPATH/bin"
-	@echo "  test      运行测试"
+	@echo "  test                 单元测试"
+	@echo "  gen-examples         生成 examples 代码"
+	@echo "  test-integration-db  MySQL/PG 复杂 Proto 集成测"
 	@echo "  clean     清理编译产物"
 	@echo "  help      显示帮助信息"
 

@@ -3,7 +3,7 @@
 //  protoc-gen-orm v0.1.0
 //  protoc           v7.34.1
 // dbType           tcaplus
-// source: players.proto
+// source: integration_game.proto
 // time 2026-06-05
 
 package tcaplus
@@ -15,55 +15,61 @@ import (
 
 import "github.com/wxdqing/protoc-gen-go-orm/examples/src"
 
-// methods for src.Player in tcaplus
+// methods for src.GameRole in tcaplus
 
-func (m *Player) TableName() string {
-	return "player" //string(m.ProtoReflect().Descriptor().Name())
+func (m *GameRole) TableName() string {
+	return "game_role" //string(m.ProtoReflect().Descriptor().Name())
 }
 
-func (m *Player) NewValue() proto.Message {
-	return &src.Player{}
+func (m *GameRole) NewValue() proto.Message {
+	return &src.GameRole{}
 }
 
-func (m *Player) PrimaryKey() []any {
-	return []any{m.Id}
+func (m *GameRole) PrimaryKey() []any {
+	return []any{m.ServerId, m.RoleId}
 }
 
-func (m *Player) PrimaryKeyNames() []string {
+func (m *GameRole) PrimaryKeyNames() []string {
 	return []string{
-		"id",
+		"server_id", "role_id",
 	}
 }
 
-func (m *Player) ToPrimaryKeyMap() map[string]any {
+func (m *GameRole) ToPrimaryKeyMap() map[string]any {
 	ret := make(map[string]any)
 
-	if !m.isZeroValue(m.Id) {
-		ret["id"] = m.Id
+	if !m.isZeroValue(m.ServerId) {
+		ret["server_id"] = m.ServerId
+	}
+	if !m.isZeroValue(m.RoleId) {
+		ret["role_id"] = m.RoleId
 	}
 
 	return ret
 }
 
-func (m *Player) ToPrimaryKeyStruct() any {
-	s := &Player{}
+func (m *GameRole) ToPrimaryKeyStruct() any {
+	s := &GameRole{}
 
-	if !m.isZeroValue(m.Id) {
-		s.Id = m.Id
+	if !m.isZeroValue(m.ServerId) {
+		s.ServerId = m.ServerId
+	}
+	if !m.isZeroValue(m.RoleId) {
+		s.RoleId = m.RoleId
 	}
 
 	return s
 }
 
-func (m *Player) Indexes() []any {
+func (m *GameRole) Indexes() []any {
 	return []any{m.Name}
 }
 
-func (m *Player) IndexNames() []string {
+func (m *GameRole) IndexNames() []string {
 	return []string{"name"}
 }
 
-func (m *Player) ToIndexMap() map[string]any {
+func (m *GameRole) ToIndexMap() map[string]any {
 	ret := map[string]any{}
 
 	if !m.isZeroValue(m.Name) {
@@ -73,8 +79,8 @@ func (m *Player) ToIndexMap() map[string]any {
 	return ret
 }
 
-func (m *Player) ToIndexStruct() any {
-	s := &Player{}
+func (m *GameRole) ToIndexStruct() any {
+	s := &GameRole{}
 
 	if !m.isZeroValue(m.Name) {
 		s.Name = m.Name
@@ -83,23 +89,25 @@ func (m *Player) ToIndexStruct() any {
 	return s
 }
 
-func (m *Player) isZeroValue(val any) bool {
+func (m *GameRole) isZeroValue(val any) bool {
 	rv := reflect.ValueOf(val)
 	return rv.IsZero() //|| rv.IsNil()
 }
 
-func (m *Player) EncodeFrom(value proto.Message) error {
+func (m *GameRole) EncodeFrom(value proto.Message) error {
 	return m.EncodeFromContext(nil, value)
 }
 
-func (m *Player) EncodeFromContext(ctx Context, value proto.Message) error {
+func (m *GameRole) EncodeFromContext(ctx Context, value proto.Message) error {
 	if hook, ok := any(m).(BeforeEncodeHook); ok {
 		if err := hook.BeforeEncode(ctx, value); err != nil {
 			return err
 		}
 	}
-	r := value.(*src.Player)
-	m.Id = r.Id // set pk
+	r := value.(*src.GameRole)
+	m.ServerId = r.ServerId // set pk
+
+	m.RoleId = r.RoleId // set pk
 
 	m.Name = r.Name // set index
 
@@ -120,11 +128,11 @@ func (m *Player) EncodeFromContext(ctx Context, value proto.Message) error {
 	return nil
 }
 
-func (m *Player) DecodeTo(value proto.Message) error {
+func (m *GameRole) DecodeTo(value proto.Message) error {
 	return m.DecodeToContext(nil, value)
 }
 
-func (m *Player) DecodeToContext(ctx Context, value proto.Message) error {
+func (m *GameRole) DecodeToContext(ctx Context, value proto.Message) error {
 	if hook, ok := any(m).(BeforeDecodeHook); ok {
 		if err := hook.BeforeDecode(ctx, value); err != nil {
 			return err
@@ -138,7 +146,7 @@ func (m *Player) DecodeToContext(ctx Context, value proto.Message) error {
 		SetVersion(ver int64)
 	})
 	vp.SetVersion(m.Version)
-	src.SetPlayerDefaults(value.(*src.Player))
+	src.SetGameRoleDefaults(value.(*src.GameRole))
 	if hook, ok := any(m).(AfterDecodeHook); ok {
 		if err := hook.AfterDecode(ctx, value); err != nil {
 			return err
@@ -147,8 +155,8 @@ func (m *Player) DecodeToContext(ctx Context, value proto.Message) error {
 	return nil
 }
 
-// SetVersion 设置Player的版本号
-func (m *Player) SetVersion(ver int64) {
+// SetVersion 设置GameRole的版本号
+func (m *GameRole) SetVersion(ver int64) {
 	if m == nil {
 		return
 	}

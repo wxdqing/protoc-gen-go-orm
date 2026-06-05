@@ -4,6 +4,6 @@
 //  protoc           v7.34.1
 // dbType           redis
 // source: tables.proto
-// time 2026-06-04
+// time 2026-06-05
 
 package redis

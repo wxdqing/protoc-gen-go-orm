@@ -4,7 +4,7 @@
 //  protoc           v7.34.1
 // dbType           redis
 // source: fields_player.proto
-// time 2026-06-04
+// time 2026-06-05
 
 package redis
 

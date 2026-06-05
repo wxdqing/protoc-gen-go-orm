@@ -4,7 +4,7 @@
 //  protoc           v7.34.1
 // dbType           mongo
 // source: list.proto
-// time 2026-06-04
+// time 2026-06-05
 
 package mongo
 
