@@ -31,26 +31,26 @@ const (
 // MySQL表结构定义
 type Player struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"primary_key;column:id;autoIncrement:false;index:idx_player_name"`                //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_player_name;column:id",   "origin":"id" }
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty" gorm:"index:idx_player_name;column:name"`                                           //{  "index":"index:idx_player_name;column:name",   "origin":"name" }
-	Level         int32                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`                                                                                 //{     "origin":"level" }
-	Exp           int64                  `protobuf:"varint,4,opt,name=exp,proto3" json:"exp,omitempty"`                                                                                     //{     "origin":"exp" }// // heros is blob data in gorm
-	Heros         []byte                 `protobuf:"bytes,5,opt,name=heros,proto3" json:"heros,omitempty" gorm:"type:blob;column:heros"`                                                    //{    "blob":"type:blob;column:heros", "origin":"heros" }
-	BaseModel     *BaseModel             `protobuf:"bytes,6,opt,name=baseModel,proto3" json:"baseModel,omitempty" gorm:"embedded"`                                                          //{   "embedded":"embedded",  "origin":"baseModel" }
-	Settings      []byte                 `protobuf:"bytes,7,opt,name=settings,proto3" json:"settings,omitempty" gorm:"type:json;column:settings;serializer:json"`                           //{   "json":"type:json;column:settings;serializer:json",  "origin":"settings" }
-	Array         []byte                 `protobuf:"bytes,8,opt,name=array,proto3" json:"array,omitempty" gorm:"type:json;column:array;serializer:json"`                                    //{   "json":"type:json;column:array;serializer:json",  "origin":"array" }
-	PlayerEnum    int32                  `protobuf:"varint,9,opt,name=player_enum,json=playerEnum,proto3" json:"player_enum,omitempty"`                                                     //{     "origin":"player_enum" }
-	Enums         []byte                 `protobuf:"bytes,10,opt,name=enums,proto3" json:"enums,omitempty" gorm:"type:json;column:enums;serializer:json"`                                   //{   "json":"type:json;column:enums;serializer:json",  "origin":"enums" }
-	Data          []byte                 `protobuf:"bytes,11,opt,name=data,proto3" json:"data,omitempty"`                                                                                   //{     "origin":"data" }
-	Models        []byte                 `protobuf:"bytes,12,opt,name=models,proto3" json:"models,omitempty" gorm:"type:json;column:models;serializer:json"`                                //{   "json":"type:json;column:models;serializer:json",  "origin":"models" }
-	SkipMe        []byte                 `protobuf:"bytes,13,opt,name=skip_me,json=skipMe,proto3" json:"skip_me,omitempty" gorm:"type:json;column:skip_me;serializer:json"`                 //{   "json":"type:json;column:skip_me;serializer:json",  "origin":"skip_me" }
-	Nested        []byte                 `protobuf:"bytes,21,opt,name=nested,proto3" json:"nested,omitempty" gorm:"type:json;column:nested;serializer:json"`                                //{   "json":"type:json;column:nested;serializer:json",  "origin":"nested" }
-	Nesteds       []byte                 `protobuf:"bytes,22,opt,name=nesteds,proto3" json:"nesteds,omitempty" gorm:"type:json;column:nesteds;serializer:json"`                             //{   "json":"type:json;column:nesteds;serializer:json",  "origin":"nesteds" }
-	NestedMap     []byte                 `protobuf:"bytes,23,opt,name=nested_map,json=nestedMap,proto3" json:"nested_map,omitempty" gorm:"type:json;column:nested_map;serializer:json"`     //{   "json":"type:json;column:nested_map;serializer:json",  "origin":"nested_map" }
-	Nested2       []byte                 `protobuf:"bytes,24,opt,name=nested2,proto3" json:"nested2,omitempty" gorm:"type:json;column:nested2;serializer:json"`                             //{   "json":"type:json;column:nested2;serializer:json",  "origin":"nested2" }
-	N2S           []byte                 `protobuf:"bytes,25,opt,name=n2s,proto3" json:"n2s,omitempty" gorm:"type:json;column:n2s;serializer:json"`                                         //{   "json":"type:json;column:n2s;serializer:json",  "origin":"n2s" }
-	Nested2Map    []byte                 `protobuf:"bytes,26,opt,name=nested2_map,json=nested2Map,proto3" json:"nested2_map,omitempty" gorm:"type:json;column:nested2_map;serializer:json"` //{   "json":"type:json;column:nested2_map;serializer:json",  "origin":"nested2_map" }
-	Version       int64                  `protobuf:"varint,27,opt,name=version,proto3" json:"version,omitempty"`                                                                            //{     "origin":"version" }
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"primary_key;column:id;autoIncrement:false;index:idx_player_name"`                //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_player_name;column:id", "origin":"id" }
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty" gorm:"index:idx_player_name;column:name"`                                           //{ "index":"index:idx_player_name;column:name", "origin":"name" }
+	Level         int32                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`                                                                                 //{ "origin":"level" }
+	Exp           int64                  `protobuf:"varint,4,opt,name=exp,proto3" json:"exp,omitempty"`                                                                                     //{ "origin":"exp" }// // heros is blob data in gorm
+	Heros         []byte                 `protobuf:"bytes,5,opt,name=heros,proto3" json:"heros,omitempty" gorm:"type:blob;column:heros"`                                                    //{ "blob":"type:blob;column:heros", "origin":"heros" }
+	BaseModel     *BaseModel             `protobuf:"bytes,6,opt,name=baseModel,proto3" json:"baseModel,omitempty" gorm:"embedded"`                                                          //{ "embedded":"embedded", "origin":"baseModel" }
+	Settings      []byte                 `protobuf:"bytes,7,opt,name=settings,proto3" json:"settings,omitempty" gorm:"type:json;column:settings;serializer:json"`                           //{ "json":"type:json;column:settings;serializer:json", "origin":"settings" }
+	Array         []byte                 `protobuf:"bytes,8,opt,name=array,proto3" json:"array,omitempty" gorm:"type:json;column:array;serializer:json"`                                    //{ "json":"type:json;column:array;serializer:json", "origin":"array" }
+	PlayerEnum    int32                  `protobuf:"varint,9,opt,name=player_enum,json=playerEnum,proto3" json:"player_enum,omitempty"`                                                     //{ "origin":"player_enum" }
+	Enums         []byte                 `protobuf:"bytes,10,opt,name=enums,proto3" json:"enums,omitempty" gorm:"type:json;column:enums;serializer:json"`                                   //{ "json":"type:json;column:enums;serializer:json", "origin":"enums" }
+	Data          []byte                 `protobuf:"bytes,11,opt,name=data,proto3" json:"data,omitempty"`                                                                                   //{ "origin":"data" }
+	Models        []byte                 `protobuf:"bytes,12,opt,name=models,proto3" json:"models,omitempty" gorm:"type:json;column:models;serializer:json"`                                //{ "json":"type:json;column:models;serializer:json", "origin":"models" }
+	SkipMe        []byte                 `protobuf:"bytes,13,opt,name=skip_me,json=skipMe,proto3" json:"skip_me,omitempty" gorm:"type:json;column:skip_me;serializer:json"`                 //{ "json":"type:json;column:skip_me;serializer:json", "origin":"skip_me" }
+	Nested        []byte                 `protobuf:"bytes,21,opt,name=nested,proto3" json:"nested,omitempty" gorm:"type:json;column:nested;serializer:json"`                                //{ "json":"type:json;column:nested;serializer:json", "origin":"nested" }
+	Nesteds       []byte                 `protobuf:"bytes,22,opt,name=nesteds,proto3" json:"nesteds,omitempty" gorm:"type:json;column:nesteds;serializer:json"`                             //{ "json":"type:json;column:nesteds;serializer:json", "origin":"nesteds" }
+	NestedMap     []byte                 `protobuf:"bytes,23,opt,name=nested_map,json=nestedMap,proto3" json:"nested_map,omitempty" gorm:"type:json;column:nested_map;serializer:json"`     //{ "json":"type:json;column:nested_map;serializer:json", "origin":"nested_map" }
+	Nested2       []byte                 `protobuf:"bytes,24,opt,name=nested2,proto3" json:"nested2,omitempty" gorm:"type:json;column:nested2;serializer:json"`                             //{ "json":"type:json;column:nested2;serializer:json", "origin":"nested2" }
+	N2S           []byte                 `protobuf:"bytes,25,opt,name=n2s,proto3" json:"n2s,omitempty" gorm:"type:json;column:n2s;serializer:json"`                                         //{ "json":"type:json;column:n2s;serializer:json", "origin":"n2s" }
+	Nested2Map    []byte                 `protobuf:"bytes,26,opt,name=nested2_map,json=nested2Map,proto3" json:"nested2_map,omitempty" gorm:"type:json;column:nested2_map;serializer:json"` //{ "json":"type:json;column:nested2_map;serializer:json", "origin":"nested2_map" }
+	Version       int64                  `protobuf:"varint,27,opt,name=version,proto3" json:"version,omitempty"`                                                                            //{ "origin":"version" }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -229,9 +229,9 @@ func (x *Player) GetVersion() int64 {
 // MySQL表结构定义
 type Hero struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                //{ "origin":"id" }
+	Cid           int32                  `protobuf:"varint,2,opt,name=cid,proto3" json:"cid,omitempty"`                              //{ "origin":"cid" }
+	HeroLevel     int32                  `protobuf:"varint,3,opt,name=hero_level,json=heroLevel,proto3" json:"hero_level,omitempty"` //{ "origin":"hero_level" }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -266,23 +266,23 @@ func (*Hero) Descriptor() ([]byte, []int) {
 	return file_tb_players_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Hero) GetData() []byte {
+func (x *Hero) GetId() int64 {
 	if x != nil {
-		return x.Data
-	}
-	return nil
-}
-
-func (x *Hero) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
+		return x.Id
 	}
 	return 0
 }
 
-func (x *Hero) GetUpdatedAt() int64 {
+func (x *Hero) GetCid() int32 {
 	if x != nil {
-		return x.UpdatedAt
+		return x.Cid
+	}
+	return 0
+}
+
+func (x *Hero) GetHeroLevel() int32 {
+	if x != nil {
+		return x.HeroLevel
 	}
 	return 0
 }
@@ -291,9 +291,8 @@ func (x *Hero) GetUpdatedAt() int64 {
 // MySQL表结构定义
 type BaseModel struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,1,opt,name=CreatedAt,proto3" json:"CreatedAt,omitempty" gorm:"autoCreateTime;<-:create"` //{ "custom":"autoCreateTime;<-:create", "origin":"CreatedAt" }
+	UpdatedAt     int64                  `protobuf:"varint,2,opt,name=UpdatedAt,proto3" json:"UpdatedAt,omitempty" gorm:"autoUpdateTime"`           //{ "custom":"autoUpdateTime", "origin":"UpdatedAt" }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -326,13 +325,6 @@ func (x *BaseModel) ProtoReflect() protoreflect.Message {
 // Deprecated: Use BaseModel.ProtoReflect.Descriptor instead.
 func (*BaseModel) Descriptor() ([]byte, []int) {
 	return file_tb_players_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *BaseModel) GetData() []byte {
-	if x != nil {
-		return x.Data
-	}
-	return nil
 }
 
 func (x *BaseModel) GetCreatedAt() int64 {
@@ -378,19 +370,15 @@ const file_tb_players_proto_rawDesc = "" +
 	"\x03n2s\x18\x19 \x01(\fR\x03n2s\x12\x1f\n" +
 	"\vnested2_map\x18\x1a \x01(\fR\n" +
 	"nested2Map\x12\x18\n" +
-	"\aversion\x18\x1b \x01(\x03R\aversion\"[\n" +
-	"\x04Hero\x12\x13\n" +
-	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
+	"\aversion\x18\x1b \x01(\x03R\aversion\"G\n" +
+	"\x04Hero\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
+	"\x03cid\x18\x02 \x01(\x05R\x03cid\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
-	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt\"`\n" +
-	"\tBaseModel\x12\x13\n" +
-	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
-	"\n" +
-	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
-	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAtBBZ@github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/mysqlb\x06proto3"
+	"hero_level\x18\x03 \x01(\x05R\theroLevel\"G\n" +
+	"\tBaseModel\x12\x1c\n" +
+	"\tCreatedAt\x18\x01 \x01(\x03R\tCreatedAt\x12\x1c\n" +
+	"\tUpdatedAt\x18\x02 \x01(\x03R\tUpdatedAtBBZ@github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/mysqlb\x06proto3"
 
 var (
 	file_tb_players_proto_rawDescOnce sync.Once

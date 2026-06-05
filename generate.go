@@ -62,6 +62,9 @@ var funcMap = template.FuncMap{
 	"IsEmbeddedField":     isEmbeddedField,
 	"IsEnumDBField":       isEnumDBField,
 	"getDBFieldType":      getDBFieldType,
+	"FieldTagComment":     fieldTagComment,
+	"EmbedTypeFields":     embedTypeFields,
+	"IsOneofGroupField":   isOneofGroupField,
 	"fail":                templateFail,
 	"add":                 func(a, b int32) int32 { return a + b },
 	"dict": func(values ...interface{}) map[string]interface{} {
@@ -228,6 +231,80 @@ func getDBFieldType(field FieldDesc) string {
 
 func isEnumDBField(field FieldDesc) bool {
 	return field.F != nil && field.F.Desc.Kind() == protoreflect.EnumKind
+}
+
+func extractGormFromOrmTags(field FieldDesc) string {
+	if !field.Tags.Valid {
+		return ""
+	}
+	tags := strings.ReplaceAll(field.Tags.Value, `\"`, `"`)
+	tags = strings.ReplaceAll(tags, `\\`, `\`)
+	const prefix = `gorm:"`
+	idx := strings.Index(tags, prefix)
+	if idx < 0 {
+		return ""
+	}
+	start := idx + len(prefix)
+	end := strings.Index(tags[start:], `"`)
+	if end < 0 {
+		return ""
+	}
+	return tags[start : start+end]
+}
+
+func fieldTagComment(field FieldDesc, msg MessageDesc, dbType string) string {
+	parts := make([]string, 0, 6)
+	opts := field.OrmOptions
+	if opts == nil {
+		opts = &FieldOrmOptions{}
+	}
+	if opts.HasPrimaryKey {
+		parts = append(parts, fmt.Sprintf(`"pk":"primary_key;column:%s;autoIncrement:false"`, toSnakeCase(field.Name)))
+	}
+	if tag := indexTagForField(msg, field); tag != "" {
+		parts = append(parts, fmt.Sprintf(`"index":"index:%s"`, tag))
+	}
+	if isEmbeddedField(field) {
+		parts = append(parts, `"embedded":"embedded"`)
+	}
+	if opts.IsJSONField {
+		colType := "json"
+		if dbType == string(DBTypePostgresSQL) {
+			colType = "jsonb"
+		}
+		parts = append(parts, fmt.Sprintf(`"json":"type:%s;column:%s;serializer:json"`, colType, toSnakeCase(field.Name)))
+	}
+	if opts.IsBlobField {
+		colType := "blob"
+		if dbType == string(DBTypePostgresSQL) {
+			colType = "bytea"
+		}
+		parts = append(parts, fmt.Sprintf(`"blob":"type:%s;column:%s"`, colType, toSnakeCase(field.Name)))
+	}
+	// orm.tags 的 gorm 片段仅用于非 table 的 embed 子消息字段；table 列由生成器 pk/index/blob/json 负责。
+	if custom := extractGormFromOrmTags(field); custom != "" && !msg.OrmOptions.IsTable {
+		parts = append(parts, fmt.Sprintf(`"custom":"%s"`, custom))
+	}
+	parts = append(parts, fmt.Sprintf(`"origin":"%s"`, field.Name))
+	return strings.Join(parts, ", ")
+}
+
+func isOneofGroupField(field FieldDesc) bool {
+	return field.Type == "oneof"
+}
+
+func embedTypeFields(messages []MessageDesc, typeName string) []FieldDesc {
+	for _, m := range messages {
+		if m.Name == typeName {
+			return m.Fields
+		}
+		for _, nested := range m.NestedMessages {
+			if nested.Name == typeName {
+				return nested.Fields
+			}
+		}
+	}
+	return nil
 }
 
 // toCamelCase 转换为驼峰命名

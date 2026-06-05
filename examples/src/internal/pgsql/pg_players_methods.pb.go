@@ -112,12 +112,11 @@ func (m *Player) EncodeFromContext(ctx Context, value proto.Message) error {
 		m.Heros = b
 	}
 	if r.BaseModel != nil {
-		m.BaseModel = &BaseModel{}
-		if b, err := proto.Marshal(r.BaseModel); err != nil {
-			return err
-		} else if err := proto.Unmarshal(b, m.BaseModel); err != nil {
-			return err
+		if m.BaseModel == nil {
+			m.BaseModel = &BaseModel{}
 		}
+		m.BaseModel.CreatedAt = r.BaseModel.CreatedAt
+		m.BaseModel.UpdatedAt = r.BaseModel.UpdatedAt
 	}
 	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "settings"); err != nil {
 		return err
@@ -210,12 +209,11 @@ func (m *Player) DecodeToContext(ctx Context, value proto.Message) error {
 		}
 	}
 	if m.BaseModel != nil {
-		r.BaseModel = &src.BaseModel{}
-		if b, err := proto.Marshal(m.BaseModel); err != nil {
-			return err
-		} else if err := proto.Unmarshal(b, r.BaseModel); err != nil {
-			return err
+		if r.BaseModel == nil {
+			r.BaseModel = &src.BaseModel{}
 		}
+		r.BaseModel.CreatedAt = m.BaseModel.CreatedAt
+		r.BaseModel.UpdatedAt = m.BaseModel.UpdatedAt
 	}
 	if len(m.Settings) > 0 {
 		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "settings", m.Settings); err != nil {

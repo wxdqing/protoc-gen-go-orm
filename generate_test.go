@@ -231,22 +231,29 @@ func TestContextTemplateIncludesContextHooks(t *testing.T) {
 
 func TestMethodsTemplateIncludesContextMethods(t *testing.T) {
 	tmpl := template.Must(template.New("method").Funcs(funcMap).Parse(methodsTemplate))
-	data := struct {
-		Package  string
-		Messages []MessageDesc
-		DBType   string
-	}{
-		Package: "src",
-		DBType:  string(DBTypeMySQL),
-		Messages: []MessageDesc{
-			{
-				Name:      "Player",
-				TableName: "player",
-				Fields: []FieldDesc{
-					{Name: "id", Type: "int64", OrmOptions: &FieldOrmOptions{HasPrimaryKey: true}},
-				},
+	msgs := []MessageDesc{
+		{
+			Name:      "Player",
+			TableName: "player",
+			OrmOptions: MessageOrmOptions{
+				IsTable:        true,
+				TableStoreMode: 1,
+			},
+			Fields: []FieldDesc{
+				{Name: "id", Type: "int64", OrmOptions: &FieldOrmOptions{HasPrimaryKey: true}},
 			},
 		},
+	}
+	data := struct {
+		Package     string
+		Messages    []MessageDesc
+		AllMessages []MessageDesc
+		DBType      string
+	}{
+		Package:     "src",
+		DBType:      string(DBTypeMySQL),
+		Messages:    msgs,
+		AllMessages: msgs,
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
@@ -324,6 +331,27 @@ func TestBuildGormTagFromFieldTagIncludesJSON(t *testing.T) {
 	want := `gorm:"primary_key;column:id;index:idx_id;type:json;column:profile"`
 	if tag != want {
 		t.Fatalf("buildGormTag() = %q, want %q", tag, want)
+	}
+}
+
+func TestExtractGormFromOrmTags(t *testing.T) {
+	got := extractGormFromOrmTags(FieldDesc{
+		Tags: OptionalString{Value: `gorm:"autoCreateTime;<-:create" json:"createdAt"`, Valid: true},
+	})
+	want := "autoCreateTime;<-:create"
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
+func TestFieldTagCommentIncludesCustomGorm(t *testing.T) {
+	comment := fieldTagComment(FieldDesc{
+		Name:       "created_at",
+		OrmOptions: &FieldOrmOptions{},
+		Tags:       OptionalString{Value: `gorm:"autoCreateTime;column:created_at"`, Valid: true},
+	}, MessageDesc{Name: "RoleTimestamps", OrmOptions: MessageOrmOptions{}}, string(DBTypeMySQL))
+	if !strings.Contains(comment, `"custom":"autoCreateTime;column:created_at"`) {
+		t.Fatalf("missing custom gorm in %q", comment)
 	}
 }
 

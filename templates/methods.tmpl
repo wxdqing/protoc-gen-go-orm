@@ -6,6 +6,7 @@
 {{- $pkg := .Package -}}
 {{- $dbType := .DBType -}}
 {{range .Messages}}
+{{$allMsgs := $.AllMessages}}
 // methods for {{$pkg}}.{{.Name}} in {{$dbType}}
 
 func (m *{{.Name}}) TableName() string {
@@ -98,14 +99,19 @@ func (m *{{.Name}}) EncodeFromContext(ctx Context, value proto.Message) error {
     {{end -}}
     {{end -}}
     {{range .Fields -}}
+    {{$embedField := . -}}
     {{if .OrmOptions.IsEmbeddedField -}}
     if r.{{ToCamelCase .Name}} != nil {
-        m.{{ToCamelCase .Name}} = &{{.Type}}{}
-        if b, err := proto.Marshal(r.{{ToCamelCase .Name}}); err != nil {
-            return err
-        } else if err := proto.Unmarshal(b, m.{{ToCamelCase .Name}}); err != nil {
-            return err
+        if m.{{ToCamelCase .Name}} == nil {
+            m.{{ToCamelCase .Name}} = &{{.Type}}{}
         }
+        {{range EmbedTypeFields $allMsgs $embedField.Type -}}
+        {{if IsEnumDBField . -}}
+        m.{{ToCamelCase $embedField.Name}}.{{ToCamelCase .Name}} = int32(r.{{ToCamelCase $embedField.Name}}.{{ToCamelCase .Name}})
+        {{else -}}
+        m.{{ToCamelCase $embedField.Name}}.{{ToCamelCase .Name}} = r.{{ToCamelCase $embedField.Name}}.{{ToCamelCase .Name}}
+        {{end -}}
+        {{end -}}
     }
     {{else if .OrmOptions.IsBlobField -}}
     if b, err := marshalProtoFieldToWire(r.ProtoReflect(), {{printf "%q" .Name}}); err != nil {
@@ -170,14 +176,19 @@ func (m *{{.Name}}) DecodeToContext(ctx Context, value proto.Message) error {
     {{end -}}
     {{end -}}
     {{range .Fields -}}
+    {{$embedField := . -}}
     {{if .OrmOptions.IsEmbeddedField -}}
     if m.{{ToCamelCase .Name}} != nil {
-        r.{{ToCamelCase .Name}} = &{{$pkg}}.{{.Type}}{}
-        if b, err := proto.Marshal(m.{{ToCamelCase .Name}}); err != nil {
-            return err
-        } else if err := proto.Unmarshal(b, r.{{ToCamelCase .Name}}); err != nil {
-            return err
+        if r.{{ToCamelCase .Name}} == nil {
+            r.{{ToCamelCase .Name}} = &{{$pkg}}.{{.Type}}{}
         }
+        {{range EmbedTypeFields $allMsgs $embedField.Type -}}
+        {{if IsEnumDBField . -}}
+        r.{{ToCamelCase $embedField.Name}}.{{ToCamelCase .Name}} = {{$pkg}}.{{getFieldType .F}}(m.{{ToCamelCase $embedField.Name}}.{{ToCamelCase .Name}})
+        {{else -}}
+        r.{{ToCamelCase $embedField.Name}}.{{ToCamelCase .Name}} = m.{{ToCamelCase $embedField.Name}}.{{ToCamelCase .Name}}
+        {{end -}}
+        {{end -}}
     }
     {{else if .OrmOptions.IsBlobField -}}
     if len(m.{{ToCamelCase .Name}}) > 0 {

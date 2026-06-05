@@ -101,7 +101,7 @@ func indexTagForField(msg MessageDesc, field FieldDesc) string {
 	if name := compositeIndexNameForField(msg, field.Name); name != "" {
 		return fmt.Sprintf("%s;column:%s", name, col)
 	}
-	if field.OrmOptions.HasIndex {
+	if field.OrmOptions != nil && field.OrmOptions.HasIndex {
 		return fmt.Sprintf("idx_%s;column:%s", col, col)
 	}
 	return ""

@@ -30,13 +30,13 @@ const (
 // MySQL表结构定义
 type FieldsPlayer struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"primary_key;column:id;autoIncrement:false;index:idx_fields_player_name"` //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_fields_player_name;column:id",   "origin":"id" }
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty" gorm:"index:idx_fields_player_name;column:name"`                            //{  "index":"index:idx_fields_player_name;column:name",   "origin":"name" }
-	Level         int32                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`                                                                         //{     "origin":"level" }
-	Exp           int64                  `protobuf:"varint,4,opt,name=exp,proto3" json:"exp,omitempty"`                                                                             //{     "origin":"exp" }
-	Heros         []byte                 `protobuf:"bytes,5,opt,name=heros,proto3" json:"heros,omitempty" gorm:"type:blob;column:heros"`                                            //{    "blob":"type:blob;column:heros", "origin":"heros" }
-	Settings      []byte                 `protobuf:"bytes,7,opt,name=settings,proto3" json:"settings,omitempty" gorm:"type:json;column:settings;serializer:json"`                   //{   "json":"type:json;column:settings;serializer:json",  "origin":"settings" }
-	PlayerEnum    int32                  `protobuf:"varint,9,opt,name=player_enum,json=playerEnum,proto3" json:"player_enum,omitempty"`                                             //{     "origin":"player_enum" }
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"primary_key;column:id;autoIncrement:false;index:idx_fields_player_name"` //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_fields_player_name;column:id", "origin":"id" }
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty" gorm:"index:idx_fields_player_name;column:name"`                            //{ "index":"index:idx_fields_player_name;column:name", "origin":"name" }
+	Level         int32                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`                                                                         //{ "origin":"level" }
+	Exp           int64                  `protobuf:"varint,4,opt,name=exp,proto3" json:"exp,omitempty"`                                                                             //{ "origin":"exp" }
+	Heros         []byte                 `protobuf:"bytes,5,opt,name=heros,proto3" json:"heros,omitempty" gorm:"type:blob;column:heros"`                                            //{ "blob":"type:blob;column:heros", "origin":"heros" }
+	Settings      []byte                 `protobuf:"bytes,7,opt,name=settings,proto3" json:"settings,omitempty" gorm:"type:json;column:settings;serializer:json"`                   //{ "json":"type:json;column:settings;serializer:json", "origin":"settings" }
+	PlayerEnum    int32                  `protobuf:"varint,9,opt,name=player_enum,json=playerEnum,proto3" json:"player_enum,omitempty"`                                             //{ "origin":"player_enum" }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

@@ -71,6 +71,7 @@ func sampleComplexPlayer(id int64) *src.Player {
 		Enums:      []src.PlayerEnum{src.PlayerEnum_Test1, src.PlayerEnum_Test2},
 		Heros:    []*src.Hero{{Id: 1, Cid: 9, HeroLevel: 12}},
 		Settings: map[string]int32{"difficulty": 3, "lang": 1},
+		BaseModel: &src.BaseModel{CreatedAt: 1_700_000_200_000, UpdatedAt: 1_700_000_300_000},
 		Nested: &src.Player_NestedM{
 			F1: 99,
 			F2: "nested",
@@ -100,6 +101,12 @@ func assertComplexPlayer(t *testing.T, got, want *src.Player) {
 	if got.Settings["difficulty"] != 3 {
 		t.Fatalf("settings: %+v", got.Settings)
 	}
+	if got.BaseModel == nil || got.BaseModel.CreatedAt != want.BaseModel.CreatedAt {
+		t.Fatalf("embed BaseModel created_at: got %+v want %+v", got.BaseModel, want.BaseModel)
+	}
+	if got.BaseModel.UpdatedAt == 0 {
+		t.Fatalf("embed BaseModel updated_at should be set by GORM autoUpdateTime")
+	}
 	if got.Nested == nil || got.Nested.F2 != "nested" {
 		t.Fatalf("nested: %+v", got.Nested)
 	}
@@ -116,6 +123,7 @@ func sampleGameRole(serverID, roleID int64) *src.GameRole {
 		Level:      15,
 		Exp:        500,
 		Heros:    []*src.RoleHero{{Id: 2, Cid: 7, HeroLevel: 4}},
+		Timestamps: &src.RoleTimestamps{CreatedAt: 1_700_000_000_000, UpdatedAt: 1_700_000_100_000},
 		Settings: map[string]int32{"zone": 8},
 		PlayerEnum: src.PlayerEnum_Test1,
 		Profile:    []byte(`{"title":"knight"}`),
@@ -135,6 +143,12 @@ func assertGameRole(t *testing.T, got, want *src.GameRole) {
 	}
 	if len(got.Profile) == 0 {
 		t.Fatalf("profile empty")
+	}
+	if got.Timestamps == nil || got.Timestamps.CreatedAt != want.Timestamps.CreatedAt {
+		t.Fatalf("embed timestamps created_at: got %+v want %+v", got.Timestamps, want.Timestamps)
+	}
+	if got.Timestamps.UpdatedAt == 0 {
+		t.Fatalf("embed timestamps updated_at should be set by GORM autoUpdateTime")
 	}
 }
 

@@ -26,6 +26,7 @@ type FieldTag struct {
 	JSON     string `json:"json"`
 	Blob     string `json:"blob"`
 	Embedded string `json:"embedded"`
+	Custom   string `json:"custom"`
 }
 
 func defaultFieldTagsForPath(filePath string) map[string]string {
@@ -163,7 +164,7 @@ func modifyAST(file *ast.File, info *TagInfo) bool {
 						fmt.Println("failed to unmarshal field tag comment:", err, " struct:", typeSpec.Name.Name, " field:", f.Names[0].Name, " comment:", str)
 						continue
 					}
-					if obj.Pk == "" && obj.Index == "" && obj.JSON == "" && obj.Blob == "" && obj.Embedded == "" {
+					if obj.Pk == "" && obj.Index == "" && obj.JSON == "" && obj.Blob == "" && obj.Embedded == "" && obj.Custom == "" {
 						continue
 					}
 					tagsOfStruct[f.Names[0].Name] = buildGormTag(obj)
@@ -248,6 +249,9 @@ func buildGormTag(tag FieldTag) string {
 	}
 	if tag.Embedded != "" {
 		raw = append(raw, tag.Embedded)
+	}
+	if tag.Custom != "" {
+		raw = append(raw, tag.Custom)
 	}
 	if len(raw) == 0 {
 		return ""

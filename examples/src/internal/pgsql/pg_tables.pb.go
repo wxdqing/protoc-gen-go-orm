@@ -30,12 +30,17 @@ const (
 // Example
 // PostgreSQL表结构定义
 type Example struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	WithNewTags     string                 `protobuf:"bytes,1,opt,name=with_new_tags,json=withNewTags,proto3" json:"with_new_tags,omitempty"`             //{ "origin":"with_new_tags" }
+	WithNewMultiple string                 `protobuf:"bytes,2,opt,name=with_new_multiple,json=withNewMultiple,proto3" json:"with_new_multiple,omitempty"` //{ "origin":"with_new_multiple" }
+	ReplaceDefault  string                 `protobuf:"bytes,3,opt,name=replace_default,json=replaceDefault,proto3" json:"replace_default,omitempty"`      //{ "origin":"replace_default" }
+	Ll              []byte                 `protobuf:"bytes,7,opt,name=ll,proto3" json:"ll,omitempty" gorm:"type:jsonb;column:ll;serializer:json"`        //{ "json":"type:jsonb;column:ll;serializer:json", "origin":"ll" }
+	Mm              []byte                 `protobuf:"bytes,8,opt,name=mm,proto3" json:"mm,omitempty" gorm:"type:jsonb;column:mm;serializer:json"`        //{ "json":"type:jsonb;column:mm;serializer:json", "origin":"mm" }
+	Nn              []byte                 `protobuf:"bytes,9,opt,name=nn,proto3" json:"nn,omitempty" gorm:"type:jsonb;column:nn;serializer:json"`        //{ "json":"type:jsonb;column:nn;serializer:json", "origin":"nn" }
+	Ee              []byte                 `protobuf:"bytes,10,opt,name=ee,proto3" json:"ee,omitempty" gorm:"type:jsonb;column:ee;serializer:json"`       //{ "json":"type:jsonb;column:ee;serializer:json", "origin":"ee" }
+	Array           []byte                 `protobuf:"bytes,11,opt,name=array,proto3" json:"array,omitempty"`                                             //{ "origin":"array" }
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Example) Reset() {
@@ -68,36 +73,73 @@ func (*Example) Descriptor() ([]byte, []int) {
 	return file_pg_tables_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Example) GetData() []byte {
+func (x *Example) GetWithNewTags() string {
 	if x != nil {
-		return x.Data
+		return x.WithNewTags
+	}
+	return ""
+}
+
+func (x *Example) GetWithNewMultiple() string {
+	if x != nil {
+		return x.WithNewMultiple
+	}
+	return ""
+}
+
+func (x *Example) GetReplaceDefault() string {
+	if x != nil {
+		return x.ReplaceDefault
+	}
+	return ""
+}
+
+func (x *Example) GetLl() []byte {
+	if x != nil {
+		return x.Ll
 	}
 	return nil
 }
 
-func (x *Example) GetCreatedAt() int64 {
+func (x *Example) GetMm() []byte {
 	if x != nil {
-		return x.CreatedAt
+		return x.Mm
 	}
-	return 0
+	return nil
 }
 
-func (x *Example) GetUpdatedAt() int64 {
+func (x *Example) GetNn() []byte {
 	if x != nil {
-		return x.UpdatedAt
+		return x.Nn
 	}
-	return 0
+	return nil
+}
+
+func (x *Example) GetEe() []byte {
+	if x != nil {
+		return x.Ee
+	}
+	return nil
+}
+
+func (x *Example) GetArray() []byte {
+	if x != nil {
+		return x.Array
+	}
+	return nil
 }
 
 // SecondMessage
 // PostgreSQL表结构定义
 type SecondMessage struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	WithNewTags     string                 `protobuf:"bytes,1,opt,name=with_new_tags,json=withNewTags,proto3" json:"with_new_tags,omitempty"`             //{ "origin":"with_new_tags" }
+	WithNewMultiple string                 `protobuf:"bytes,2,opt,name=with_new_multiple,json=withNewMultiple,proto3" json:"with_new_multiple,omitempty"` //{ "origin":"with_new_multiple" }
+	ReplaceDefault  string                 `protobuf:"bytes,3,opt,name=replace_default,json=replaceDefault,proto3" json:"replace_default,omitempty"`      //{ "origin":"replace_default" }
+	InnerEnum       int32                  `protobuf:"varint,4,opt,name=inner_enum,json=innerEnum,proto3" json:"inner_enum,omitempty"`                    //{ "origin":"inner_enum" }
+	OuterEnum       int32                  `protobuf:"varint,5,opt,name=outer_enum,json=outerEnum,proto3" json:"outer_enum,omitempty"`                    //{ "origin":"outer_enum" }
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SecondMessage) Reset() {
@@ -130,23 +172,37 @@ func (*SecondMessage) Descriptor() ([]byte, []int) {
 	return file_pg_tables_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SecondMessage) GetData() []byte {
+func (x *SecondMessage) GetWithNewTags() string {
 	if x != nil {
-		return x.Data
+		return x.WithNewTags
 	}
-	return nil
+	return ""
 }
 
-func (x *SecondMessage) GetCreatedAt() int64 {
+func (x *SecondMessage) GetWithNewMultiple() string {
 	if x != nil {
-		return x.CreatedAt
+		return x.WithNewMultiple
+	}
+	return ""
+}
+
+func (x *SecondMessage) GetReplaceDefault() string {
+	if x != nil {
+		return x.ReplaceDefault
+	}
+	return ""
+}
+
+func (x *SecondMessage) GetInnerEnum() int32 {
+	if x != nil {
+		return x.InnerEnum
 	}
 	return 0
 }
 
-func (x *SecondMessage) GetUpdatedAt() int64 {
+func (x *SecondMessage) GetOuterEnum() int32 {
 	if x != nil {
-		return x.UpdatedAt
+		return x.OuterEnum
 	}
 	return 0
 }
@@ -155,9 +211,7 @@ func (x *SecondMessage) GetUpdatedAt() int64 {
 // PostgreSQL表结构定义
 type ThirdExample struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	InnerExample  []byte                 `protobuf:"bytes,1,opt,name=inner_example,json=innerExample,proto3" json:"inner_example,omitempty" gorm:"type:jsonb;column:inner_example;serializer:json"` //{ "json":"type:jsonb;column:inner_example;serializer:json", "origin":"inner_example" }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -192,34 +246,17 @@ func (*ThirdExample) Descriptor() ([]byte, []int) {
 	return file_pg_tables_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ThirdExample) GetData() []byte {
+func (x *ThirdExample) GetInnerExample() []byte {
 	if x != nil {
-		return x.Data
+		return x.InnerExample
 	}
 	return nil
-}
-
-func (x *ThirdExample) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return 0
-}
-
-func (x *ThirdExample) GetUpdatedAt() int64 {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return 0
 }
 
 // EmptyFieldMessage
 // PostgreSQL表结构定义
 type EmptyFieldMessage struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -254,56 +291,32 @@ func (*EmptyFieldMessage) Descriptor() ([]byte, []int) {
 	return file_pg_tables_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *EmptyFieldMessage) GetData() []byte {
-	if x != nil {
-		return x.Data
-	}
-	return nil
-}
-
-func (x *EmptyFieldMessage) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return 0
-}
-
-func (x *EmptyFieldMessage) GetUpdatedAt() int64 {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return 0
-}
-
 var File_pg_tables_proto protoreflect.FileDescriptor
 
 const file_pg_tables_proto_rawDesc = "" +
 	"\n" +
-	"\x0fpg_tables.proto\x12\x05pgsql\"^\n" +
-	"\aExample\x12\x13\n" +
-	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
+	"\x0fpg_tables.proto\x12\x05pgsql\"\xd8\x01\n" +
+	"\aExample\x12\"\n" +
+	"\rwith_new_tags\x18\x01 \x01(\tR\vwithNewTags\x12*\n" +
+	"\x11with_new_multiple\x18\x02 \x01(\tR\x0fwithNewMultiple\x12'\n" +
+	"\x0freplace_default\x18\x03 \x01(\tR\x0ereplaceDefault\x12\x0e\n" +
+	"\x02ll\x18\a \x01(\fR\x02ll\x12\x0e\n" +
+	"\x02mm\x18\b \x01(\fR\x02mm\x12\x0e\n" +
+	"\x02nn\x18\t \x01(\fR\x02nn\x12\x0e\n" +
+	"\x02ee\x18\n" +
+	" \x01(\fR\x02ee\x12\x14\n" +
+	"\x05array\x18\v \x01(\fR\x05array\"\xc6\x01\n" +
+	"\rSecondMessage\x12\"\n" +
+	"\rwith_new_tags\x18\x01 \x01(\tR\vwithNewTags\x12*\n" +
+	"\x11with_new_multiple\x18\x02 \x01(\tR\x0fwithNewMultiple\x12'\n" +
+	"\x0freplace_default\x18\x03 \x01(\tR\x0ereplaceDefault\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
+	"inner_enum\x18\x04 \x01(\x05R\tinnerEnum\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt\"d\n" +
-	"\rSecondMessage\x12\x13\n" +
-	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
-	"\n" +
-	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
-	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt\"c\n" +
-	"\fThirdExample\x12\x13\n" +
-	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
-	"\n" +
-	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
-	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt\"h\n" +
-	"\x11EmptyFieldMessage\x12\x13\n" +
-	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
-	"\n" +
-	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
-	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAtBBZ@github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/pgsqlb\x06proto3"
+	"outer_enum\x18\x05 \x01(\x05R\touterEnum\"3\n" +
+	"\fThirdExample\x12#\n" +
+	"\rinner_example\x18\x01 \x01(\fR\finnerExample\"\x13\n" +
+	"\x11EmptyFieldMessageBBZ@github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/pgsqlb\x06proto3"
 
 var (
 	file_pg_tables_proto_rawDescOnce sync.Once

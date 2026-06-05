@@ -30,17 +30,17 @@ const (
 // MySQL表结构定义
 type GameRole struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ServerId      int64                  `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty" gorm:"primary_key;column:server_id;autoIncrement:false;index:idx_game_role_server_name"` //{ "pk":"primary_key;column:server_id;autoIncrement:false", "index":"index:idx_game_role_server_name;column:server_id",   "origin":"server_id" }
-	RoleId        int64                  `protobuf:"varint,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty" gorm:"primary_key;column:role_id;autoIncrement:false"`                                         //{ "pk":"primary_key;column:role_id;autoIncrement:false",    "origin":"role_id" }
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty" gorm:"index:idx_game_role_server_name;column:name"`                                                               //{  "index":"index:idx_game_role_server_name;column:name",   "origin":"name" }
-	Level         int32                  `protobuf:"varint,4,opt,name=level,proto3" json:"level,omitempty" gorm:"index:idx_game_role_server_level;column:level"`                                                          //{  "index":"index:idx_game_role_server_level;column:level",   "origin":"level" }
-	Exp           int64                  `protobuf:"varint,5,opt,name=exp,proto3" json:"exp,omitempty"`                                                                                                                   //{     "origin":"exp" }
-	Heros         []byte                 `protobuf:"bytes,6,opt,name=heros,proto3" json:"heros,omitempty" gorm:"type:blob;column:heros"`                                                                                  //{    "blob":"type:blob;column:heros", "origin":"heros" }
-	Timestamps    *RoleTimestamps        `protobuf:"bytes,7,opt,name=timestamps,proto3" json:"timestamps,omitempty" gorm:"embedded"`                                                                                      //{   "embedded":"embedded",  "origin":"timestamps" }
-	Settings      []byte                 `protobuf:"bytes,8,opt,name=settings,proto3" json:"settings,omitempty" gorm:"type:json;column:settings;serializer:json"`                                                         //{   "json":"type:json;column:settings;serializer:json",  "origin":"settings" }
-	PlayerEnum    int32                  `protobuf:"varint,9,opt,name=player_enum,json=playerEnum,proto3" json:"player_enum,omitempty"`                                                                                   //{     "origin":"player_enum" }
-	Profile       []byte                 `protobuf:"bytes,10,opt,name=profile,proto3" json:"profile,omitempty"`                                                                                                           //{     "origin":"profile" }
-	Version       int64                  `protobuf:"varint,11,opt,name=version,proto3" json:"version,omitempty"`                                                                                                          //{     "origin":"version" }
+	ServerId      int64                  `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty" gorm:"primary_key;column:server_id;autoIncrement:false;index:idx_game_role_server_name"` //{ "pk":"primary_key;column:server_id;autoIncrement:false", "index":"index:idx_game_role_server_name;column:server_id", "origin":"server_id" }
+	RoleId        int64                  `protobuf:"varint,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty" gorm:"primary_key;column:role_id;autoIncrement:false"`                                         //{ "pk":"primary_key;column:role_id;autoIncrement:false", "origin":"role_id" }
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty" gorm:"index:idx_game_role_server_name;column:name"`                                                               //{ "index":"index:idx_game_role_server_name;column:name", "origin":"name" }
+	Level         int32                  `protobuf:"varint,4,opt,name=level,proto3" json:"level,omitempty" gorm:"index:idx_game_role_server_level;column:level"`                                                          //{ "index":"index:idx_game_role_server_level;column:level", "origin":"level" }
+	Exp           int64                  `protobuf:"varint,5,opt,name=exp,proto3" json:"exp,omitempty"`                                                                                                                   //{ "origin":"exp" }
+	Heros         []byte                 `protobuf:"bytes,6,opt,name=heros,proto3" json:"heros,omitempty" gorm:"type:blob;column:heros"`                                                                                  //{ "blob":"type:blob;column:heros", "origin":"heros" }
+	Timestamps    *RoleTimestamps        `protobuf:"bytes,7,opt,name=timestamps,proto3" json:"timestamps,omitempty" gorm:"embedded"`                                                                                      //{ "embedded":"embedded", "origin":"timestamps" }
+	Settings      []byte                 `protobuf:"bytes,8,opt,name=settings,proto3" json:"settings,omitempty" gorm:"type:json;column:settings;serializer:json"`                                                         //{ "json":"type:json;column:settings;serializer:json", "origin":"settings" }
+	PlayerEnum    int32                  `protobuf:"varint,9,opt,name=player_enum,json=playerEnum,proto3" json:"player_enum,omitempty"`                                                                                   //{ "origin":"player_enum" }
+	Profile       []byte                 `protobuf:"bytes,10,opt,name=profile,proto3" json:"profile,omitempty"`                                                                                                           //{ "origin":"profile" }
+	Version       int64                  `protobuf:"varint,11,opt,name=version,proto3" json:"version,omitempty"`                                                                                                          //{ "origin":"version" }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -156,9 +156,9 @@ func (x *GameRole) GetVersion() int64 {
 // MySQL表结构定义
 type RoleHero struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                //{ "origin":"id" }
+	Cid           int32                  `protobuf:"varint,2,opt,name=cid,proto3" json:"cid,omitempty"`                              //{ "origin":"cid" }
+	HeroLevel     int32                  `protobuf:"varint,3,opt,name=hero_level,json=heroLevel,proto3" json:"hero_level,omitempty"` //{ "origin":"hero_level" }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -193,23 +193,23 @@ func (*RoleHero) Descriptor() ([]byte, []int) {
 	return file_tb_integration_game_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *RoleHero) GetData() []byte {
+func (x *RoleHero) GetId() int64 {
 	if x != nil {
-		return x.Data
-	}
-	return nil
-}
-
-func (x *RoleHero) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
+		return x.Id
 	}
 	return 0
 }
 
-func (x *RoleHero) GetUpdatedAt() int64 {
+func (x *RoleHero) GetCid() int32 {
 	if x != nil {
-		return x.UpdatedAt
+		return x.Cid
+	}
+	return 0
+}
+
+func (x *RoleHero) GetHeroLevel() int32 {
+	if x != nil {
+		return x.HeroLevel
 	}
 	return 0
 }
@@ -218,9 +218,8 @@ func (x *RoleHero) GetUpdatedAt() int64 {
 // MySQL表结构定义
 type RoleTimestamps struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" gorm:"autoCreateTime;<-:create"` //{ "custom":"autoCreateTime;<-:create", "origin":"created_at" }
+	UpdatedAt     int64                  `protobuf:"varint,2,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"autoUpdateTime"`           //{ "custom":"autoUpdateTime", "origin":"updated_at" }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -253,13 +252,6 @@ func (x *RoleTimestamps) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RoleTimestamps.ProtoReflect.Descriptor instead.
 func (*RoleTimestamps) Descriptor() ([]byte, []int) {
 	return file_tb_integration_game_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *RoleTimestamps) GetData() []byte {
-	if x != nil {
-		return x.Data
-	}
-	return nil
 }
 
 func (x *RoleTimestamps) GetCreatedAt() int64 {
@@ -296,19 +288,17 @@ const file_tb_integration_game_proto_rawDesc = "" +
 	"playerEnum\x12\x18\n" +
 	"\aprofile\x18\n" +
 	" \x01(\fR\aprofile\x12\x18\n" +
-	"\aversion\x18\v \x01(\x03R\aversion\"_\n" +
-	"\bRoleHero\x12\x13\n" +
-	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
+	"\aversion\x18\v \x01(\x03R\aversion\"K\n" +
+	"\bRoleHero\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
+	"\x03cid\x18\x02 \x01(\x05R\x03cid\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
+	"hero_level\x18\x03 \x01(\x05R\theroLevel\"N\n" +
+	"\x0eRoleTimestamps\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAt\"e\n" +
-	"\x0eRoleTimestamps\x12\x13\n" +
-	"\x04data\x18\xe7\a \x01(\fR\x04data\x12\x1e\n" +
+	"created_at\x18\x01 \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\xe8\a \x01(\x03R\tcreatedAt\x12\x1e\n" +
-	"\n" +
-	"updated_at\x18\xe9\a \x01(\x03R\tupdatedAtBBZ@github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/mysqlb\x06proto3"
+	"updated_at\x18\x02 \x01(\x03R\tupdatedAtBBZ@github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/mysqlb\x06proto3"
 
 var (
 	file_tb_integration_game_proto_rawDescOnce sync.Once

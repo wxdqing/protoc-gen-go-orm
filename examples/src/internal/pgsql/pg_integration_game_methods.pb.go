@@ -119,12 +119,11 @@ func (m *GameRole) EncodeFromContext(ctx Context, value proto.Message) error {
 		m.Heros = b
 	}
 	if r.Timestamps != nil {
-		m.Timestamps = &RoleTimestamps{}
-		if b, err := proto.Marshal(r.Timestamps); err != nil {
-			return err
-		} else if err := proto.Unmarshal(b, m.Timestamps); err != nil {
-			return err
+		if m.Timestamps == nil {
+			m.Timestamps = &RoleTimestamps{}
 		}
+		m.Timestamps.CreatedAt = r.Timestamps.CreatedAt
+		m.Timestamps.UpdatedAt = r.Timestamps.UpdatedAt
 	}
 	if b, err := marshalProtoFieldToJSON(r.ProtoReflect(), "settings"); err != nil {
 		return err
@@ -168,12 +167,11 @@ func (m *GameRole) DecodeToContext(ctx Context, value proto.Message) error {
 		}
 	}
 	if m.Timestamps != nil {
-		r.Timestamps = &src.RoleTimestamps{}
-		if b, err := proto.Marshal(m.Timestamps); err != nil {
-			return err
-		} else if err := proto.Unmarshal(b, r.Timestamps); err != nil {
-			return err
+		if r.Timestamps == nil {
+			r.Timestamps = &src.RoleTimestamps{}
 		}
+		r.Timestamps.CreatedAt = m.Timestamps.CreatedAt
+		r.Timestamps.UpdatedAt = m.Timestamps.UpdatedAt
 	}
 	if len(m.Settings) > 0 {
 		if err := unmarshalProtoFieldFromJSON(r.ProtoReflect(), "settings", m.Settings); err != nil {

@@ -28,6 +28,7 @@ func generateMethods(gen *protogen.Plugin, file *protogen.File, messages []Messa
 		Package       string
 		GoPackage     string
 		Messages      []MessageDesc
+		AllMessages   []MessageDesc
 		DBType        string
 		Source        string
 		Enums         []EnumDesc
@@ -37,6 +38,7 @@ func generateMethods(gen *protogen.Plugin, file *protogen.File, messages []Messa
 		Package:       string(file.Desc.Package()),
 		GoPackage:     string(file.GoPackageName),
 		Messages:      filteredMessages,
+		AllMessages:   messages,
 		DBType:        string(dbType),
 		Source:        file.Desc.Path(),
 		Enums:         enums,
