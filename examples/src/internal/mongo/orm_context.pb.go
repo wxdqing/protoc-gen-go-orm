@@ -142,7 +142,7 @@ func unmarshalProtoValueWire(dest protoreflect.Message, fd protoreflect.FieldDes
 
 func unmarshalProtoListWire(dest protoreflect.Message, fd protoreflect.FieldDescriptor, data []byte) error {
 	if fd.Kind() != protoreflect.MessageKind {
-		return json.Unmarshal(data, dest.Mutable(fd).Interface())
+		return unmarshalScalarProtoList(dest.Mutable(fd).List(), fd, data)
 	}
 	list := dest.Mutable(fd).List()
 	list.Truncate(0)
@@ -280,6 +280,95 @@ func unmarshalProtoValue(dest protoreflect.Message, fd protoreflect.FieldDescrip
 	}
 }
 
+func unmarshalScalarProtoList(list protoreflect.List, fd protoreflect.FieldDescriptor, data []byte) error {
+	list.Truncate(0)
+	switch fd.Kind() {
+	case protoreflect.BoolKind:
+		var s []bool
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfBool(v))
+		}
+	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
+		var s []int32
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfInt32(v))
+		}
+	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
+		var s []int64
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfInt64(v))
+		}
+	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
+		var s []uint32
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfUint32(v))
+		}
+	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
+		var s []uint64
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfUint64(v))
+		}
+	case protoreflect.FloatKind:
+		var s []float32
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfFloat32(v))
+		}
+	case protoreflect.DoubleKind:
+		var s []float64
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfFloat64(v))
+		}
+	case protoreflect.StringKind:
+		var s []string
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfString(v))
+		}
+	case protoreflect.BytesKind:
+		var s [][]byte
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfBytes(v))
+		}
+	case protoreflect.EnumKind:
+		var s []int32
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		for _, v := range s {
+			list.Append(protoreflect.ValueOfEnum(protoreflect.EnumNumber(v)))
+		}
+	default:
+		return fmt.Errorf("orm: unsupported scalar list kind %v", fd.Kind())
+	}
+	return nil
+}
+
 func unmarshalProtoList(dest protoreflect.Message, fd protoreflect.FieldDescriptor, data []byte) error {
 	if fd.Kind() == protoreflect.MessageKind {
 		var raw []json.RawMessage
@@ -297,7 +386,7 @@ func unmarshalProtoList(dest protoreflect.Message, fd protoreflect.FieldDescript
 		}
 		return nil
 	}
-	return json.Unmarshal(data, dest.Mutable(fd).Interface())
+	return unmarshalScalarProtoList(dest.Mutable(fd).List(), fd, data)
 }
 
 func unmarshalProtoMap(dest protoreflect.Message, fd protoreflect.FieldDescriptor, data []byte) error {

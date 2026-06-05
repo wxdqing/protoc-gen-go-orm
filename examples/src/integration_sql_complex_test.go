@@ -61,13 +61,14 @@ func tryInitSQL(t *testing.T, driverType string, conf *orm.Conf) {
 }
 
 func sampleComplexPlayer(id int64) *src.Player {
-	// 避开 repeated 标量 JSON 列已知解码问题（array/enums）；保留 blob/map/message/embed。
 	return &src.Player{
 		Id:         id,
 		Name:       "integration_player",
 		Level:      42,
 		Exp:        1000,
 		PlayerEnum: src.PlayerEnum_Test2,
+		Array:      []int32{10, 20},
+		Enums:      []src.PlayerEnum{src.PlayerEnum_Test1, src.PlayerEnum_Test2},
 		Heros:    []*src.Hero{{Id: 1, Cid: 9, HeroLevel: 12}},
 		Settings: map[string]int32{"difficulty": 3, "lang": 1},
 		Nested: &src.Player_NestedM{
@@ -86,6 +87,12 @@ func assertComplexPlayer(t *testing.T, got, want *src.Player) {
 	}
 	if got.PlayerEnum != want.PlayerEnum {
 		t.Fatalf("enum: %v want %v", got.PlayerEnum, want.PlayerEnum)
+	}
+	if len(got.Array) != 2 || got.Array[0] != 10 || got.Array[1] != 20 {
+		t.Fatalf("array: %+v", got.Array)
+	}
+	if len(got.Enums) != 2 || got.Enums[0] != src.PlayerEnum_Test1 {
+		t.Fatalf("enums: %+v", got.Enums)
 	}
 	if len(got.Heros) != 1 || got.Heros[0].HeroLevel != 12 {
 		t.Fatalf("heros: %+v", got.Heros)

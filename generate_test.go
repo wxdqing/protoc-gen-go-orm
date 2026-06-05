@@ -203,6 +203,7 @@ func TestContextTemplateIncludesJSONCodec(t *testing.T) {
 		"func marshalProtoFieldToWire",
 		"func unmarshalProtoFieldFromWire",
 		"func unmarshalProtoListWire",
+		"func unmarshalScalarProtoList",
 		"protowire.AppendVarint",
 	} {
 		if !strings.Contains(out, want) {
