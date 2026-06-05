@@ -11,12 +11,12 @@ option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/
 
 // PostgreSQL表结构定义
 message FieldsPlayer {
-int64 id = 1; //{ "index":"index:idx_fields_player_name;column:id",   "origin":"id" }
-string name = 2; //{ "index":"index:idx_fields_player_name;column:name",   "origin":"name" }
-int32 level = 3; //{    "origin":"level" }
-int64 exp = 4; //{    "origin":"exp" }
-bytes heros = 5; //{   "blob":"type:bytea;column:heros", "origin":"heros" }
-bytes settings = 7; //{  "json":"type:jsonb;column:settings;serializer:json",  "origin":"settings" }
-int32 player_enum = 9; //{    "origin":"player_enum" }
+int64 id = 1; //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_fields_player_name;column:id",   "origin":"id" }
+string name = 2; //{  "index":"index:idx_fields_player_name;column:name",   "origin":"name" }
+int32 level = 3; //{     "origin":"level" }
+int64 exp = 4; //{     "origin":"exp" }
+bytes heros = 5; //{    "blob":"type:bytea;column:heros", "origin":"heros" }
+bytes settings = 7; //{   "json":"type:jsonb;column:settings;serializer:json",  "origin":"settings" }
+int32 player_enum = 9; //{     "origin":"player_enum" }
 }
 

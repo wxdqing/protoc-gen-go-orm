@@ -31,8 +31,8 @@ const (
 // PostgreSQL表结构定义
 type Lister struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Rid           int64                  `protobuf:"varint,1,opt,name=rid,proto3" json:"rid,omitempty" gorm:"index:idx_lister_rid_id;column:rid"` //{ "index":"index:idx_lister_rid_id;column:rid",   "origin":"rid" }
-	Id            int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty" gorm:"index:idx_lister_rid_id;column:id"`    //{ "index":"index:idx_lister_rid_id;column:id",   "origin":"id" }
+	Rid           int64                  `protobuf:"varint,1,opt,name=rid,proto3" json:"rid,omitempty" gorm:"primary_key;column:rid;autoIncrement:false;index:idx_lister_rid_id"` //{ "pk":"primary_key;column:rid;autoIncrement:false", "index":"index:idx_lister_rid_id;column:rid",   "origin":"rid" }
+	Id            int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty" gorm:"primary_key;column:id;autoIncrement:false;index:idx_lister_rid_id"`    //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_lister_rid_id;column:id",   "origin":"id" }
 	Data          []byte                 `protobuf:"bytes,999,opt,name=data,proto3" json:"data,omitempty" gorm:"column:data;type:bytea"`
 	CreatedAt     int64                  `protobuf:"varint,1000,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" gorm:"column:created_at;autoCreateTime;<-:create"`
 	UpdatedAt     int64                  `protobuf:"varint,1001,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"column:updated_at;autoUpdateTime"`

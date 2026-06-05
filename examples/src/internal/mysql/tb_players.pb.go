@@ -31,12 +31,12 @@ const (
 // MySQL表结构定义
 type Player struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"primary_key;column:id;autoIncrement:false;index:idx_player_name;column:id"`      //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_player_name;column:id",   "origin":"id" }
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"primary_key;column:id;autoIncrement:false;index:idx_player_name"`                //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_player_name;column:id",   "origin":"id" }
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty" gorm:"index:idx_player_name;column:name"`                                           //{  "index":"index:idx_player_name;column:name",   "origin":"name" }
 	Level         int32                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`                                                                                 //{     "origin":"level" }
 	Exp           int64                  `protobuf:"varint,4,opt,name=exp,proto3" json:"exp,omitempty"`                                                                                     //{     "origin":"exp" }// // heros is blob data in gorm
 	Heros         []byte                 `protobuf:"bytes,5,opt,name=heros,proto3" json:"heros,omitempty" gorm:"type:blob;column:heros"`                                                    //{    "blob":"type:blob;column:heros", "origin":"heros" }
-	BaseModel     *BaseModel             `protobuf:"bytes,6,opt,name=baseModel,proto3" json:"baseModel,omitempty"`                                                                          //{   "embedded":"embedded",  "origin":"baseModel" }
+	BaseModel     *BaseModel             `protobuf:"bytes,6,opt,name=baseModel,proto3" json:"baseModel,omitempty" gorm:"embedded"`                                                          //{   "embedded":"embedded",  "origin":"baseModel" }
 	Settings      []byte                 `protobuf:"bytes,7,opt,name=settings,proto3" json:"settings,omitempty" gorm:"type:json;column:settings;serializer:json"`                           //{   "json":"type:json;column:settings;serializer:json",  "origin":"settings" }
 	Array         []byte                 `protobuf:"bytes,8,opt,name=array,proto3" json:"array,omitempty" gorm:"type:json;column:array;serializer:json"`                                    //{   "json":"type:json;column:array;serializer:json",  "origin":"array" }
 	PlayerEnum    int32                  `protobuf:"varint,9,opt,name=player_enum,json=playerEnum,proto3" json:"player_enum,omitempty"`                                                     //{     "origin":"player_enum" }

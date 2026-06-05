@@ -10,27 +10,27 @@ option go_package = "github.com/wxdqing/protoc-gen-go-orm/examples/src/internal/
 // Player 
 // PostgreSQL表结构定义
 message Player {
-int64 id = 1; //{ "index":"index:idx_player_name;column:id",   "origin":"id" }
-string name = 2; //{ "index":"index:idx_player_name;column:name",   "origin":"name" }
-int32 level = 3; //{    "origin":"level" }
-int64 exp = 4; //{    "origin":"exp" }// // heros is blob data in gorm
+int64 id = 1; //{ "pk":"primary_key;column:id;autoIncrement:false", "index":"index:idx_player_name;column:id",   "origin":"id" }
+string name = 2; //{  "index":"index:idx_player_name;column:name",   "origin":"name" }
+int32 level = 3; //{     "origin":"level" }
+int64 exp = 4; //{     "origin":"exp" }// // heros is blob data in gorm
 
-bytes heros = 5; //{   "blob":"type:bytea;column:heros", "origin":"heros" }
-BaseModel baseModel = 6; //{  "embedded":"embedded",  "origin":"baseModel" }
-bytes settings = 7; //{  "json":"type:jsonb;column:settings;serializer:json",  "origin":"settings" }
-bytes array = 8; //{  "json":"type:jsonb;column:array;serializer:json",  "origin":"array" }
-int32 player_enum = 9; //{    "origin":"player_enum" }
-bytes enums = 10; //{  "json":"type:jsonb;column:enums;serializer:json",  "origin":"enums" }
-bytes data = 11; //{    "origin":"data" }
-bytes models = 12; //{  "json":"type:jsonb;column:models;serializer:json",  "origin":"models" }
-bytes skip_me = 13; //{  "json":"type:jsonb;column:skip_me;serializer:json",  "origin":"skip_me" }
-bytes nested = 21; //{  "json":"type:jsonb;column:nested;serializer:json",  "origin":"nested" }
-bytes nesteds = 22; //{  "json":"type:jsonb;column:nesteds;serializer:json",  "origin":"nesteds" }
-bytes nested_map = 23; //{  "json":"type:jsonb;column:nested_map;serializer:json",  "origin":"nested_map" }
-bytes nested2 = 24; //{  "json":"type:jsonb;column:nested2;serializer:json",  "origin":"nested2" }
-bytes n2s = 25; //{  "json":"type:jsonb;column:n2s;serializer:json",  "origin":"n2s" }
-bytes nested2_map = 26; //{  "json":"type:jsonb;column:nested2_map;serializer:json",  "origin":"nested2_map" }
-int64 version = 27; //{    "origin":"version" }
+bytes heros = 5; //{    "blob":"type:bytea;column:heros", "origin":"heros" }
+BaseModel baseModel = 6; //{   "embedded":"embedded",  "origin":"baseModel" }
+bytes settings = 7; //{   "json":"type:jsonb;column:settings;serializer:json",  "origin":"settings" }
+bytes array = 8; //{   "json":"type:jsonb;column:array;serializer:json",  "origin":"array" }
+int32 player_enum = 9; //{     "origin":"player_enum" }
+bytes enums = 10; //{   "json":"type:jsonb;column:enums;serializer:json",  "origin":"enums" }
+bytes data = 11; //{     "origin":"data" }
+bytes models = 12; //{   "json":"type:jsonb;column:models;serializer:json",  "origin":"models" }
+bytes skip_me = 13; //{   "json":"type:jsonb;column:skip_me;serializer:json",  "origin":"skip_me" }
+bytes nested = 21; //{   "json":"type:jsonb;column:nested;serializer:json",  "origin":"nested" }
+bytes nesteds = 22; //{   "json":"type:jsonb;column:nesteds;serializer:json",  "origin":"nesteds" }
+bytes nested_map = 23; //{   "json":"type:jsonb;column:nested_map;serializer:json",  "origin":"nested_map" }
+bytes nested2 = 24; //{   "json":"type:jsonb;column:nested2;serializer:json",  "origin":"nested2" }
+bytes n2s = 25; //{   "json":"type:jsonb;column:n2s;serializer:json",  "origin":"n2s" }
+bytes nested2_map = 26; //{   "json":"type:jsonb;column:nested2_map;serializer:json",  "origin":"nested2_map" }
+int64 version = 27; //{     "origin":"version" }
 }
 
 

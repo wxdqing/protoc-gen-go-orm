@@ -21,10 +21,11 @@ type TagInfo struct {
 }
 
 type FieldTag struct {
-	Pk    string `json:"pk"`
-	Index string `json:"index"`
-	JSON  string `json:"json"`
-	Blob  string `json:"blob"`
+	Pk       string `json:"pk"`
+	Index    string `json:"index"`
+	JSON     string `json:"json"`
+	Blob     string `json:"blob"`
+	Embedded string `json:"embedded"`
 }
 
 func defaultFieldTagsForPath(filePath string) map[string]string {
@@ -162,7 +163,7 @@ func modifyAST(file *ast.File, info *TagInfo) bool {
 						fmt.Println("failed to unmarshal field tag comment:", err, " struct:", typeSpec.Name.Name, " field:", f.Names[0].Name, " comment:", str)
 						continue
 					}
-					if obj.Pk == "" && obj.Index == "" && obj.JSON == "" && obj.Blob == "" {
+					if obj.Pk == "" && obj.Index == "" && obj.JSON == "" && obj.Blob == "" && obj.Embedded == "" {
 						continue
 					}
 					tagsOfStruct[f.Names[0].Name] = buildGormTag(obj)
@@ -232,23 +233,43 @@ func extractFieldTagJSON(s string) string {
 }
 
 func buildGormTag(tag FieldTag) string {
-	parts := make([]string, 0, 3)
+	raw := make([]string, 0, 5)
 	if tag.Pk != "" {
-		parts = append(parts, tag.Pk)
+		raw = append(raw, tag.Pk)
 	}
 	if tag.Index != "" {
-		parts = append(parts, tag.Index)
+		raw = append(raw, tag.Index)
 	}
 	if tag.JSON != "" {
-		parts = append(parts, tag.JSON)
+		raw = append(raw, tag.JSON)
 	}
 	if tag.Blob != "" {
-		parts = append(parts, tag.Blob)
+		raw = append(raw, tag.Blob)
 	}
-	if len(parts) == 0 {
+	if tag.Embedded != "" {
+		raw = append(raw, tag.Embedded)
+	}
+	if len(raw) == 0 {
 		return ""
 	}
-	return fmt.Sprintf(`gorm:"%s"`, strings.Join(parts, ";"))
+	return fmt.Sprintf(`gorm:"%s"`, strings.Join(dedupeGormSubparts(raw), ";"))
+}
+
+// dedupeGormSubparts 合并 pk/index 等同字段多段 gorm 子句时去掉完全重复的片段（如重复的 column:xxx）。
+func dedupeGormSubparts(parts []string) []string {
+	seen := make(map[string]bool, len(parts))
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		for _, sub := range strings.Split(part, ";") {
+			sub = strings.TrimSpace(sub)
+			if sub == "" || seen[sub] {
+				continue
+			}
+			seen[sub] = true
+			out = append(out, sub)
+		}
+	}
+	return out
 }
 
 func modifyStructTags(structType *ast.StructType, fieldTags map[string]string) bool {

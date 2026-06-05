@@ -320,7 +320,18 @@ func TestBuildGormTagFromFieldTagIncludesJSON(t *testing.T) {
 		Index: "index:idx_id;column:id",
 		JSON:  "type:json;column:profile",
 	})
-	want := `gorm:"primary_key;column:id;index:idx_id;column:id;type:json;column:profile"`
+	want := `gorm:"primary_key;column:id;index:idx_id;type:json;column:profile"`
+	if tag != want {
+		t.Fatalf("buildGormTag() = %q, want %q", tag, want)
+	}
+}
+
+func TestBuildGormTagDedupesDuplicateColumn(t *testing.T) {
+	tag := buildGormTag(FieldTag{
+		Pk:    "primary_key;column:server_id;autoIncrement:false",
+		Index: "index:idx_game_role_server_name;column:server_id",
+	})
+	want := `gorm:"primary_key;column:server_id;autoIncrement:false;index:idx_game_role_server_name"`
 	if tag != want {
 		t.Fatalf("buildGormTag() = %q, want %q", tag, want)
 	}
@@ -372,6 +383,14 @@ func TestTemplateFail(t *testing.T) {
 	_, err := templateFail("bad option")
 	if err == nil || err.Error() != "bad option" {
 		t.Fatalf("templateFail() = %v", err)
+	}
+}
+
+func TestBuildGormTagFromFieldTagIncludesEmbedded(t *testing.T) {
+	tag := buildGormTag(FieldTag{Embedded: "embedded"})
+	want := `gorm:"embedded"`
+	if tag != want {
+		t.Fatalf("buildGormTag() = %q, want %q", tag, want)
 	}
 }
 
