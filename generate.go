@@ -226,6 +226,12 @@ func getDBFieldType(field FieldDesc) string {
 	if isEnumDBField(field) {
 		return "int32"
 	}
+	switch field.Type {
+	case "float32":
+		return "float"
+	case "float64":
+		return "double"
+	}
 	return field.Type
 }
 
