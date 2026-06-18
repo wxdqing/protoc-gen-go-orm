@@ -182,6 +182,30 @@ var file_orm_option_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "orm.option.proto",
 	},
 	{
+		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
+		ExtensionType: (*string)(nil),
+		Field:         60034,
+		Name:          "orm.table_name",
+		Tag:           "bytes,60034,opt,name=table_name",
+		Filename:      "orm.option.proto",
+	},
+	{
+		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
+		ExtensionType: ([]string)(nil),
+		Field:         60035,
+		Name:          "orm.partial_index",
+		Tag:           "bytes,60035,rep,name=partial_index",
+		Filename:      "orm.option.proto",
+	},
+	{
+		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
+		ExtensionType: ([]string)(nil),
+		Field:         60036,
+		Name:          "orm.db_driver",
+		Tag:           "bytes,60036,rep,name=db_driver",
+		Filename:      "orm.option.proto",
+	},
+	{
 		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
 		ExtensionType: (*string)(nil),
 		Field:         847939,
@@ -222,6 +246,14 @@ var file_orm_option_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "orm.option.proto",
 	},
 	{
+		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
+		ExtensionType: (*string)(nil),
+		Field:         847944,
+		Name:          "orm.foreign_key",
+		Tag:           "bytes,847944,opt,name=foreign_key",
+		Filename:      "orm.option.proto",
+	},
+	{
 		ExtendedType:  (*descriptorpb.OneofOptions)(nil),
 		ExtensionType: (*string)(nil),
 		Field:         847939,
@@ -257,6 +289,18 @@ var (
 	//
 	// repeated string composite_index = 60033;
 	E_CompositeIndex = &file_orm_option_proto_extTypes[13]
+	// 物理表名覆盖，默认 message 名 snake_case
+	//
+	// optional string table_name = 60034;
+	E_TableName = &file_orm_option_proto_extTypes[14]
+	// 部分索引，格式：UNIQUE uq_name(col1,col2) WHERE scope='*' 或 INDEX idx_name(col1 DESC)
+	//
+	// repeated string partial_index = 60035;
+	E_PartialIndex = &file_orm_option_proto_extTypes[15]
+	// 限定生成的 DB 驱动，如 "pgsql"。为空则生成全部（mysql/tcaplus/pgsql/redis/mongo）
+	//
+	// repeated string db_driver = 60036;
+	E_DbDriver = &file_orm_option_proto_extTypes[16]
 )
 
 // Extension fields to descriptorpb.FieldOptions.
@@ -270,15 +314,19 @@ var (
 	// Multiple Tags can be specified.
 	//
 	// optional string tags = 847939;
-	E_Tags = &file_orm_option_proto_extTypes[14]
+	E_Tags = &file_orm_option_proto_extTypes[17]
 	// optional bool primary_key = 847940;
-	E_PrimaryKey = &file_orm_option_proto_extTypes[15] // Marks this field as a primary key
+	E_PrimaryKey = &file_orm_option_proto_extTypes[18] // Marks this field as a primary key
 	// optional bool skip_set_default = 847941;
-	E_SkipSetDefault = &file_orm_option_proto_extTypes[16] // ignore default value assignment for this field
+	E_SkipSetDefault = &file_orm_option_proto_extTypes[19] // ignore default value assignment for this field
 	// optional bool index = 847942;
-	E_Index = &file_orm_option_proto_extTypes[17] // Marks this field as index
+	E_Index = &file_orm_option_proto_extTypes[20] // Marks this field as index
 	// optional bool sharding_key = 847943;
-	E_ShardingKey = &file_orm_option_proto_extTypes[18] // Marks this field as tcaplus sharding key
+	E_ShardingKey = &file_orm_option_proto_extTypes[21] // Marks this field as tcaplus sharding key
+	// 外键，格式：ref_table(ref_col) ON DELETE CASCADE
+	//
+	// optional string foreign_key = 847944;
+	E_ForeignKey = &file_orm_option_proto_extTypes[22]
 )
 
 // Extension fields to descriptorpb.OneofOptions.
@@ -286,7 +334,7 @@ var (
 	// Multiple Tags can be specified.
 	//
 	// optional string oneof_tags = 847939;
-	E_OneofTags = &file_orm_option_proto_extTypes[19]
+	E_OneofTags = &file_orm_option_proto_extTypes[23]
 )
 
 var File_orm_option_proto protoreflect.FileDescriptor
@@ -310,13 +358,19 @@ const file_orm_option_proto_rawDesc = "" +
 	"\x05table\x12\x1f.google.protobuf.MessageOptions\x18\xfe\xd4\x03 \x01(\bR\x05table:>\n" +
 	"\tnode_type\x12\x1f.google.protobuf.MessageOptions\x18\xff\xd4\x03 \x01(\tR\bnodeType:`\n" +
 	"\x10table_store_mode\x12\x1f.google.protobuf.MessageOptions\x18\x80\xd5\x03 \x01(\x0e2\x13.orm.TableStoreModeR\x0etableStoreMode:J\n" +
-	"\x0fcomposite_index\x12\x1f.google.protobuf.MessageOptions\x18\x81\xd5\x03 \x03(\tR\x0ecompositeIndex:3\n" +
+	"\x0fcomposite_index\x12\x1f.google.protobuf.MessageOptions\x18\x81\xd5\x03 \x03(\tR\x0ecompositeIndex:@\n" +
+	"\n" +
+	"table_name\x12\x1f.google.protobuf.MessageOptions\x18\x82\xd5\x03 \x01(\tR\ttableName:F\n" +
+	"\rpartial_index\x12\x1f.google.protobuf.MessageOptions\x18\x83\xd5\x03 \x03(\tR\fpartialIndex:>\n" +
+	"\tdb_driver\x12\x1f.google.protobuf.MessageOptions\x18\x84\xd5\x03 \x03(\tR\bdbDriver:3\n" +
 	"\x04tags\x12\x1d.google.protobuf.FieldOptions\x18\xc3\xe03 \x01(\tR\x04tags:@\n" +
 	"\vprimary_key\x12\x1d.google.protobuf.FieldOptions\x18\xc4\xe03 \x01(\bR\n" +
 	"primaryKey:I\n" +
 	"\x10skip_set_default\x12\x1d.google.protobuf.FieldOptions\x18\xc5\xe03 \x01(\bR\x0eskipSetDefault:5\n" +
 	"\x05index\x12\x1d.google.protobuf.FieldOptions\x18\xc6\xe03 \x01(\bR\x05index:B\n" +
-	"\fsharding_key\x12\x1d.google.protobuf.FieldOptions\x18\xc7\xe03 \x01(\bR\vshardingKey:>\n" +
+	"\fsharding_key\x12\x1d.google.protobuf.FieldOptions\x18\xc7\xe03 \x01(\bR\vshardingKey:@\n" +
+	"\vforeign_key\x12\x1d.google.protobuf.FieldOptions\x18\xc8\xe03 \x01(\tR\n" +
+	"foreignKey:>\n" +
 	"\n" +
 	"oneof_tags\x12\x1d.google.protobuf.OneofOptions\x18\xc3\xe03 \x01(\tR\toneofTagsB.Z,github.com/wxdqing/protoc-gen-go-orm/optionsb\x06proto3"
 
@@ -354,17 +408,21 @@ var file_orm_option_proto_depIdxs = []int32{
 	1,  // 11: orm.node_type:extendee -> google.protobuf.MessageOptions
 	1,  // 12: orm.table_store_mode:extendee -> google.protobuf.MessageOptions
 	1,  // 13: orm.composite_index:extendee -> google.protobuf.MessageOptions
-	2,  // 14: orm.tags:extendee -> google.protobuf.FieldOptions
-	2,  // 15: orm.primary_key:extendee -> google.protobuf.FieldOptions
-	2,  // 16: orm.skip_set_default:extendee -> google.protobuf.FieldOptions
-	2,  // 17: orm.index:extendee -> google.protobuf.FieldOptions
-	2,  // 18: orm.sharding_key:extendee -> google.protobuf.FieldOptions
-	3,  // 19: orm.oneof_tags:extendee -> google.protobuf.OneofOptions
-	0,  // 20: orm.table_store_mode:type_name -> orm.TableStoreMode
-	21, // [21:21] is the sub-list for method output_type
-	21, // [21:21] is the sub-list for method input_type
-	20, // [20:21] is the sub-list for extension type_name
-	0,  // [0:20] is the sub-list for extension extendee
+	1,  // 14: orm.table_name:extendee -> google.protobuf.MessageOptions
+	1,  // 15: orm.partial_index:extendee -> google.protobuf.MessageOptions
+	1,  // 16: orm.db_driver:extendee -> google.protobuf.MessageOptions
+	2,  // 17: orm.tags:extendee -> google.protobuf.FieldOptions
+	2,  // 18: orm.primary_key:extendee -> google.protobuf.FieldOptions
+	2,  // 19: orm.skip_set_default:extendee -> google.protobuf.FieldOptions
+	2,  // 20: orm.index:extendee -> google.protobuf.FieldOptions
+	2,  // 21: orm.sharding_key:extendee -> google.protobuf.FieldOptions
+	2,  // 22: orm.foreign_key:extendee -> google.protobuf.FieldOptions
+	3,  // 23: orm.oneof_tags:extendee -> google.protobuf.OneofOptions
+	0,  // 24: orm.table_store_mode:type_name -> orm.TableStoreMode
+	25, // [25:25] is the sub-list for method output_type
+	25, // [25:25] is the sub-list for method input_type
+	24, // [24:25] is the sub-list for extension type_name
+	0,  // [0:24] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
 }
 
@@ -380,7 +438,7 @@ func file_orm_option_proto_init() {
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_orm_option_proto_rawDesc), len(file_orm_option_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   0,
-			NumExtensions: 20,
+			NumExtensions: 24,
 			NumServices:   0,
 		},
 		GoTypes:           file_orm_option_proto_goTypes,

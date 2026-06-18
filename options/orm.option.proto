@@ -36,6 +36,12 @@ extend google.protobuf.MessageOptions
   TableStoreMode table_store_mode = 60032;
   // 联合索引，格式：idx_name(col1,col2)，用于 GORM 同 index 名多列与 tcaplus_index
   repeated string composite_index = 60033;
+  // 物理表名覆盖，默认 message 名 snake_case
+  string table_name = 60034;
+  // 部分索引，格式：UNIQUE uq_name(col1,col2) WHERE scope='*' 或 INDEX idx_name(col1 DESC)
+  repeated string partial_index = 60035;
+  // 限定生成的 DB 驱动，如 "pgsql"。为空则生成全部（mysql/tcaplus/pgsql/redis/mongo）
+  repeated string db_driver = 60036;
 }
 
 // Tags are applied at the field level
@@ -46,6 +52,8 @@ extend google.protobuf.FieldOptions {
   bool skip_set_default = 847941; // ignore default value assignment for this field
   bool index = 847942; // Marks this field as index
   bool sharding_key = 847943; // Marks this field as tcaplus sharding key
+  // 外键，格式：ref_table(ref_col) ON DELETE CASCADE
+  string foreign_key = 847944;
 }
 
 extend google.protobuf.OneofOptions {
