@@ -1,3 +1,17 @@
+// ORM logical table names (proto message names, used by HandlerRegistry).
+const (
+{{- range .Messages }}
+    Table{{.Name}} = "{{.Name}}"
+{{- end }}
+)
+
+// pgsql physical table names (from orm.table_name in proto).
+const (
+{{- range .Messages }}
+    Pgsql{{.Name}} = "{{.TableName}}"
+{{- end }}
+)
+
 var Tables = make(map[string][]proto.Message)
 var NodeTables = make(map[string]map[string][]proto.Message){{- $f := . }}
 

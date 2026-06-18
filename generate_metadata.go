@@ -44,7 +44,7 @@ func generateMetadata(gen *protogen.Plugin, file *protogen.File, messages []Mess
 		GoPackage:      string(file.GoPackageName),
 		Messages:       filteredMessages,
 		DirectMessages: directMessages,
-		DBTypes:        supportedDBTypes(),
+		DBTypes:        activeDBTypes(filteredMessages),
 		Source:         file.Desc.Path(),
 		Enums:          enums,
 	}
@@ -71,7 +71,7 @@ func generateMetadata(gen *protogen.Plugin, file *protogen.File, messages []Mess
 	// imports
 	g.QualifiedGoIdent(protoPackage.Ident(""))
 	if len(filteredMessages) > 0 {
-		for _, dbType := range supportedDBTypes() {
+		for _, dbType := range activeDBTypes(filteredMessages) {
 			g.QualifiedGoIdent((file.GoImportPath + "/" + outputBaseInternalDir + "/" + protogen.GoImportPath(dbType)).Ident(""))
 		}
 	}
