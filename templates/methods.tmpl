@@ -236,6 +236,17 @@ func (m *{{.Name}}) SetVersion(ver int64) {
 }
 {{- end}}
 
+{{- $migrations := ExtraMigrations . -}}
+{{- if $migrations }}
+func (m *{{.Name}}) ExtraMigrations() []string {
+    return []string{
+        {{- range $migrations }}
+        {{printf "%q" .}},
+        {{- end }}
+    }
+}
+{{- end }}
+
 {{- end }}
 
 {{- end}}

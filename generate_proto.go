@@ -128,6 +128,8 @@ type MessageOrmOptions struct {
 	HasVersion          bool
 	ShardingKeyField    OptionalValue
 	CompositeIndexSpecs []string // (orm.composite_index)，如 idx_pk(rid,id)
+	PartialIndexSpecs   []string // (orm.partial_index)
+	DbDrivers           []string // (orm.db_driver)，空=全部驱动
 }
 
 type FieldOrmOptions struct {
@@ -138,6 +140,9 @@ type FieldOrmOptions struct {
 	IsJSONField      bool
 	IsBlobField      bool
 	IsEmbeddedField  bool
+	HasForeignKey    bool
+	ForeignKeySpec   string
+	Optional         bool // proto3 optional scalar
 }
 
 // generateFile 生成文件
@@ -162,8 +167,12 @@ func generateFiles(gen *protogen.Plugin, file *protogen.File, cb func([]MessageD
 		panic(fmt.Errorf("collect enums failed: %w", err))
 	}
 
-	for _, dbType := range supportedDBTypes() {
-		if err = generateForDBType(gen, file, messages, enums, dbType); err != nil {
+	for _, dbType := range targetDBTypes() {
+		filtered := filterMessagesForDBType(messages, dbType)
+		if len(filtered) == 0 {
+			continue
+		}
+		if err = generateForDBType(gen, file, filtered, enums, dbType); err != nil {
 			panic(fmt.Errorf("generate %s failed: %w", dbType, err))
 		}
 	}
@@ -186,6 +195,9 @@ func warnFieldsModeOnKV(sourcePath string, msg *MessageDesc, dbType DBType) {
 	if msg.OrmOptions.TableStoreMode != options.TableStoreMode_TABLE_STORE_MODE_FIELDS {
 		return
 	}
+	if len(msg.OrmOptions.DbDrivers) > 0 && !messageSupportsDBType(*msg, dbType) {
+		return
+	}
 	if sourcePath == "" {
 		sourcePath = "?"
 	}
@@ -193,6 +205,64 @@ func warnFieldsModeOnKV(sourcePath string, msg *MessageDesc, dbType DBType) {
 		"%s: warning: table %q uses TABLE_STORE_MODE_FIELDS for %s; KV drivers only support PAYLOAD (pk/index/version + data). Generated code uses kv.tmpl.\n",
 		sourcePath, msg.Name, dbType,
 	)
+}
+
+func messageSupportsDBType(msg MessageDesc, dbType DBType) bool {
+	if !msg.OrmOptions.IsTable {
+		return true
+	}
+	if len(msg.OrmOptions.DbDrivers) == 0 {
+		return true
+	}
+	for _, d := range msg.OrmOptions.DbDrivers {
+		if DBType(strings.TrimSpace(d)) == dbType {
+			return true
+		}
+	}
+	return false
+}
+
+func filterMessagesForDBType(messages []MessageDesc, dbType DBType) []MessageDesc {
+	var out []MessageDesc
+	for _, msg := range messages {
+		if messageSupportsDBType(msg, dbType) {
+			out = append(out, msg)
+		}
+	}
+	return out
+}
+
+func activeDBTypes(messages []MessageDesc) []DBType {
+	allowed := targetDBTypeSet()
+	used := make(map[DBType]bool)
+	for _, msg := range messages {
+		if !msg.OrmOptions.IsTable {
+			continue
+		}
+		if len(msg.OrmOptions.DbDrivers) == 0 {
+			for _, t := range targetDBTypes() {
+				used[t] = true
+			}
+			continue
+		}
+		for _, d := range msg.OrmOptions.DbDrivers {
+			t := DBType(strings.TrimSpace(d))
+			if allowed != nil && !allowed[t] {
+				continue
+			}
+			if err := t.Validate(); err != nil {
+				continue
+			}
+			used[t] = true
+		}
+	}
+	var out []DBType
+	for _, t := range targetDBTypes() {
+		if used[t] {
+			out = append(out, t)
+		}
+	}
+	return out
 }
 
 // generateForDBType 为特定数据库类型生成文件
@@ -474,6 +544,9 @@ func collectFields(msg *protogen.Message, cb ...func(fd *FieldDesc)) ([]FieldDes
 			for _, ft := range fts {
 				ft(&fieldDesc)
 			}
+			if field.Desc.HasOptionalKeyword() {
+				fieldDesc.OrmOptions.Optional = true
+			}
 			fieldDesc.OrmOptions.IsEmbeddedField = isEmbeddedField(fieldDesc)
 			fieldDesc.OrmOptions.IsJSONField = isJSONDBField(fieldDesc)
 			fieldDesc.OrmOptions.IsBlobField = hasBlobTag(fieldDesc)
@@ -609,6 +682,42 @@ func messageOrmOptionAppliers(msgOpts protoreflect.ProtoMessage) []func(desc *Me
 				desc.OrmOptions.CompositeIndexSpecs = specs
 				desc.OrmOptions.HasIndexes = true
 			})
+		}
+	}
+	if proto.HasExtension(msgOpts, options.E_TableName) {
+		opt := proto.GetExtension(msgOpts, options.E_TableName)
+		if s := strings.TrimSpace(opt.(string)); s != "" {
+			fns = append(fns, func(desc *MessageDesc) {
+				desc.TableName = s
+				desc.OrmOptions.TableName = OptionalString{Value: s, Valid: true}
+			})
+		}
+	}
+	if proto.HasExtension(msgOpts, options.E_PartialIndex) {
+		opt := proto.GetExtension(msgOpts, options.E_PartialIndex)
+		if arr, ok := opt.([]string); ok && len(arr) > 0 {
+			specs := make([]string, len(arr))
+			copy(specs, arr)
+			fns = append(fns, func(desc *MessageDesc) {
+				desc.OrmOptions.PartialIndexSpecs = specs
+				desc.OrmOptions.HasIndexes = true
+			})
+		}
+	}
+	if proto.HasExtension(msgOpts, options.E_DbDriver) {
+		opt := proto.GetExtension(msgOpts, options.E_DbDriver)
+		if arr, ok := opt.([]string); ok && len(arr) > 0 {
+			drivers := make([]string, 0, len(arr))
+			for _, d := range arr {
+				if s := strings.TrimSpace(d); s != "" {
+					drivers = append(drivers, s)
+				}
+			}
+			if len(drivers) > 0 {
+				fns = append(fns, func(desc *MessageDesc) {
+					desc.OrmOptions.DbDrivers = drivers
+				})
+			}
 		}
 	}
 	return fns
@@ -919,6 +1028,15 @@ func parseOrmFieldOptions(field *protogen.Field) []func(desc *FieldDesc) {
 		if b := opt.(bool); b {
 			fns = append(fns, func(desc *FieldDesc) {
 				desc.OrmOptions.HasShardingKey = b
+			})
+		}
+	}
+	if proto.HasExtension(field.Desc.Options(), options.E_ForeignKey) {
+		opt := proto.GetExtension(field.Desc.Options(), options.E_ForeignKey)
+		if s := strings.TrimSpace(opt.(string)); s != "" {
+			fns = append(fns, func(desc *FieldDesc) {
+				desc.OrmOptions.HasForeignKey = true
+				desc.OrmOptions.ForeignKeySpec = s
 			})
 		}
 	}

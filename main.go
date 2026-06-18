@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/types/pluginpb"
 )
 
 var mod string
@@ -29,6 +30,7 @@ func main() {
 
 		// 运行代码生成器
 		opts.Run(func(gen *protogen.Plugin) error {
+			gen.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
 			// 获取protoc版本
 			protocVersion = "(unknown)"
 			if v := gen.Request.GetCompilerVersion(); v != nil {
@@ -38,6 +40,7 @@ func main() {
 				}
 			}
 			// 遍历所有需要生成代码的文件
+			initPluginOptions(gen)
 			allMsgs := make([]MessageDesc, 0)
 			allEnums := make([]EnumDesc, 0)
 			var file *protogen.File
@@ -61,10 +64,12 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			//err = generateTcaplusOptionProto(gen, file, DBTypeTcaplus)
-			//if err != nil {
-			//	panic(err)
-			//}
+			if isTargetDBType(DBTypeTcaplus) {
+				err = generateTcaplusOptionProto(gen, file, string(DBTypeTcaplus))
+				if err != nil {
+					panic(err)
+				}
+			}
 
 			return nil
 		})

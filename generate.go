@@ -58,6 +58,13 @@ var funcMap = template.FuncMap{
 	"JoinPk":              joinFieldsPk,
 	"JoinIndex":           joinFieldsIndex,
 	"IndexTag":            indexTagForField,
+	"ExtraMigrations":     extraMigrationsForMessage,
+	"optionalPrefix": func(f FieldDesc) string {
+		if f.OrmOptions != nil && f.OrmOptions.Optional {
+			return "optional "
+		}
+		return ""
+	},
 	"IsJSONDBField":       isJSONDBField,
 	"IsEmbeddedField":     isEmbeddedField,
 	"IsEnumDBField":       isEnumDBField,
@@ -95,12 +102,14 @@ func shardingKeyExprFromAny(v interface{}) string {
 func shardingKeyExpr(f FieldDesc) string {
 	field := "x." + toCamelCase(f.Name)
 	switch f.Type {
+	case "string":
+		return "0"
 	case "int64":
 		return field
 	case "int32", "uint32", "uint64":
 		return "int64(" + field + ")"
 	default:
-		return "int64(" + field + ")"
+		return "0"
 	}
 }
 
