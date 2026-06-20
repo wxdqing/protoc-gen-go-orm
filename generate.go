@@ -65,15 +65,15 @@ var funcMap = template.FuncMap{
 		}
 		return ""
 	},
-	"IsJSONDBField":       isJSONDBField,
-	"IsEmbeddedField":     isEmbeddedField,
-	"IsEnumDBField":       isEnumDBField,
-	"getDBFieldType":      getDBFieldType,
-	"FieldTagComment":     fieldTagComment,
-	"EmbedTypeFields":     embedTypeFields,
-	"IsOneofGroupField":   isOneofGroupField,
-	"fail":                templateFail,
-	"add":                 func(a, b int32) int32 { return a + b },
+	"IsJSONDBField":     isJSONDBField,
+	"IsEmbeddedField":   isEmbeddedField,
+	"IsEnumDBField":     isEnumDBField,
+	"getDBFieldType":    getDBFieldType,
+	"FieldTagComment":   fieldTagComment,
+	"EmbedTypeFields":   embedTypeFields,
+	"IsOneofGroupField": isOneofGroupField,
+	"fail":              templateFail,
+	"add":               func(a, b int32) int32 { return a + b },
 	"dict": func(values ...interface{}) map[string]interface{} {
 		if len(values)%2 != 0 {
 			return nil
@@ -468,4 +468,3 @@ func joinFieldsPk(msg *MessageDesc) string {
 	}
 	return strings.Join(pkFields, ", ")
 }
-

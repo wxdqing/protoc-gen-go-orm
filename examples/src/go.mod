@@ -64,5 +64,5 @@ require (
 replace (
 	git.wxdqing.com/sprout/logger.git => ../../../../sprout/sprout/logger
 	github.com/wxdqing/go-orm => ../../../orm
-	github.com/wxdqing/protoc-gen-go-orm => ../..
+	github.com/wxdqing/protoc-gen-go-orm => ./../..
 )
