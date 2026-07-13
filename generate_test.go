@@ -272,36 +272,46 @@ func TestMethodsTemplateIncludesContextMethods(t *testing.T) {
 
 func TestMetadataTemplateIncludesNodeTableHelpers(t *testing.T) {
 	tmpl := template.Must(template.New("metadata").Funcs(funcMap).Parse(metadataTemplate))
-	data := struct {
-		Version        string
-		ProtocVersion  string
-		Package        string
-		GoPackage      string
-		Messages       []MessageDesc
-		DirectMessages map[string][]MessageDesc
-		DBTypes        []DBType
-		Source         string
-		Enums          []EnumDesc
-	}{
-		Package: "src",
-		Messages: []MessageDesc{
-			{
-				Name: "Player",
-				OrmOptions: MessageOrmOptions{
-					IsTable:  true,
-					NodeType: OptionalString{Value: "game", Valid: true},
-				},
-			},
-			{
-				Name: "Lister",
-				OrmOptions: MessageOrmOptions{
-					IsTable:  true,
-					NodeType: OptionalString{Value: "social", Valid: true},
-				},
+	messages := []MessageDesc{
+		{
+			Name: "Player",
+			OrmOptions: MessageOrmOptions{
+				IsTable:  true,
+				NodeType: OptionalString{Value: "game", Valid: true},
 			},
 		},
-		DirectMessages: map[string][]MessageDesc{},
-		DBTypes:        supportedDBTypes(),
+		{
+			Name: "Lister",
+			OrmOptions: MessageOrmOptions{
+				IsTable:  true,
+				NodeType: OptionalString{Value: "social", Valid: true},
+			},
+		},
+	}
+	dbTypes := supportedDBTypes()
+	messagesByDBType := make(map[DBType][]MessageDesc, len(dbTypes))
+	for _, dbType := range dbTypes {
+		messagesByDBType[dbType] = filterMessagesForDBType(messages, dbType)
+	}
+	data := struct {
+		Version          string
+		ProtocVersion    string
+		Package          string
+		GoPackage        string
+		Messages         []MessageDesc
+		MessagesByDBType map[DBType][]MessageDesc
+		PostgresDBType   DBType
+		DirectMessages   map[string][]MessageDesc
+		DBTypes          []DBType
+		Source           string
+		Enums            []EnumDesc
+	}{
+		Package:          "src",
+		Messages:         messages,
+		MessagesByDBType: messagesByDBType,
+		PostgresDBType:   DBTypePostgresSQL,
+		DirectMessages:   map[string][]MessageDesc{},
+		DBTypes:          dbTypes,
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
@@ -318,6 +328,89 @@ func TestMetadataTemplateIncludesNodeTableHelpers(t *testing.T) {
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("metadata template missing %q in:\n%s", want, out)
+		}
+	}
+}
+
+func TestMetadataTemplateFiltersMessagesByDBType(t *testing.T) {
+	tmpl := template.Must(template.New("metadata").Funcs(funcMap).Parse(metadataTemplate))
+	messages := []MessageDesc{
+		{
+			Name:      "SharedTable",
+			TableName: "shared_table",
+			OrmOptions: MessageOrmOptions{
+				IsTable:  true,
+				NodeType: OptionalString{Value: "game", Valid: true},
+			},
+		},
+		{
+			Name:      "PgsqlTable",
+			TableName: "pgsql_table",
+			OrmOptions: MessageOrmOptions{
+				IsTable:   true,
+				NodeType:  OptionalString{Value: "game", Valid: true},
+				DbDrivers: []string{"pgsql"},
+			},
+		},
+		{
+			Name:      "RedisTable",
+			TableName: "redis_table",
+			OrmOptions: MessageOrmOptions{
+				IsTable:   true,
+				NodeType:  OptionalString{Value: "social", Valid: true},
+				DbDrivers: []string{"redis"},
+			},
+		},
+	}
+	dbTypes := []DBType{DBTypePostgresSQL, DBTypeRedis}
+	data := struct {
+		Messages         []MessageDesc
+		MessagesByDBType map[DBType][]MessageDesc
+		PostgresDBType   DBType
+		DirectMessages   map[string][]MessageDesc
+		DBTypes          []DBType
+		Package          string
+	}{
+		Messages: messages,
+		MessagesByDBType: map[DBType][]MessageDesc{
+			DBTypePostgresSQL: filterMessagesForDBType(messages, DBTypePostgresSQL),
+			DBTypeRedis:       filterMessagesForDBType(messages, DBTypeRedis),
+		},
+		PostgresDBType: DBTypePostgresSQL,
+		DirectMessages: map[string][]MessageDesc{},
+		DBTypes:        dbTypes,
+		Package:        "schema",
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		t.Fatalf("execute metadata template: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{
+		"TableSharedTable",
+		"TablePgsqlTable",
+		"TableRedisTable",
+		"PgsqlSharedTable",
+		"PgsqlPgsqlTable",
+		"&pgsql.SharedTable{}",
+		"&pgsql.PgsqlTable{}",
+		"&redis.SharedTable{}",
+		"&redis.RedisTable{}",
+		`NodeTables["pgsql"]["game"]`,
+		`NodeTables["redis"]["social"]`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("metadata template missing %q in:\n%s", want, out)
+		}
+	}
+	for _, unwanted := range []string{
+		"PgsqlRedisTable",
+		"&pgsql.RedisTable{}",
+		"&redis.PgsqlTable{}",
+	} {
+		if strings.Contains(out, unwanted) {
+			t.Fatalf("metadata template unexpectedly contains %q in:\n%s", unwanted, out)
 		}
 	}
 }

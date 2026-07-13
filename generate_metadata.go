@@ -27,26 +27,35 @@ func generateMetadata(gen *protogen.Plugin, file *protogen.File, messages []Mess
 			directMessages[string(DBTypeTcaplus)] = dm
 		}
 	}
+	dbTypes := activeDBTypes(filteredMessages)
+	messagesByDBType := make(map[DBType][]MessageDesc, len(dbTypes))
+	for _, dbType := range dbTypes {
+		messagesByDBType[dbType] = filterMessagesForDBType(filteredMessages, dbType)
+	}
 	data := struct {
-		Version        string
-		ProtocVersion  string
-		Package        string
-		GoPackage      string
-		Messages       []MessageDesc
-		DirectMessages map[string][]MessageDesc
-		DBTypes        []DBType
-		Source         string
-		Enums          []EnumDesc
+		Version          string
+		ProtocVersion    string
+		Package          string
+		GoPackage        string
+		Messages         []MessageDesc
+		MessagesByDBType map[DBType][]MessageDesc
+		PostgresDBType   DBType
+		DirectMessages   map[string][]MessageDesc
+		DBTypes          []DBType
+		Source           string
+		Enums            []EnumDesc
 	}{
-		Version:        version,
-		ProtocVersion:  protocVersion,
-		Package:        string(file.Desc.Package()),
-		GoPackage:      string(file.GoPackageName),
-		Messages:       filteredMessages,
-		DirectMessages: directMessages,
-		DBTypes:        activeDBTypes(filteredMessages),
-		Source:         file.Desc.Path(),
-		Enums:          enums,
+		Version:          version,
+		ProtocVersion:    protocVersion,
+		Package:          string(file.Desc.Package()),
+		GoPackage:        string(file.GoPackageName),
+		Messages:         filteredMessages,
+		MessagesByDBType: messagesByDBType,
+		PostgresDBType:   DBTypePostgresSQL,
+		DirectMessages:   directMessages,
+		DBTypes:          dbTypes,
+		Source:           file.Desc.Path(),
+		Enums:            enums,
 	}
 
 	// 解析模板
@@ -71,7 +80,7 @@ func generateMetadata(gen *protogen.Plugin, file *protogen.File, messages []Mess
 	// imports
 	g.QualifiedGoIdent(protoPackage.Ident(""))
 	if len(filteredMessages) > 0 {
-		for _, dbType := range activeDBTypes(filteredMessages) {
+		for _, dbType := range dbTypes {
 			g.QualifiedGoIdent((file.GoImportPath + "/" + outputBaseInternalDir + "/" + protogen.GoImportPath(dbType)).Ident(""))
 		}
 	}

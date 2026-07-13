@@ -1,3 +1,4 @@
+{{- $messagesByDBType := .MessagesByDBType -}}
 // ORM logical table names (proto message names, used by HandlerRegistry).
 const (
 {{- range .Messages }}
@@ -7,7 +8,8 @@ const (
 
 // pgsql physical table names (from orm.table_name in proto).
 const (
-{{- range .Messages }}
+{{- $postgresMessages := index $messagesByDBType .PostgresDBType }}
+{{- range $postgresMessages }}
     Pgsql{{.Name}} = "{{.TableName}}"
 {{- end }}
 )
@@ -16,17 +18,17 @@ var Tables = make(map[string][]proto.Message)
 var NodeTables = make(map[string]map[string][]proto.Message){{- $f := . }}
 
 func init() {
-    {{- $msgs := .Messages -}}
     {{- range .DBTypes }}
     {{- $dbType := . -}}
+    {{- $messages := index $messagesByDBType $dbType -}}
     // {{.}} database tables
     Tables["{{.}}"] = []proto.Message{
-        {{- range $msgs }}
+        {{- range $messages }}
         &{{$dbType}}.{{.Name}}{},
         {{- end }}
     }
     NodeTables["{{.}}"] = make(map[string][]proto.Message)
-        {{- range $msgs }}
+        {{- range $messages }}
         NodeTables["{{$dbType}}"]["{{.OrmOptions.NodeType.Value}}"] = append(NodeTables["{{$dbType}}"]["{{.OrmOptions.NodeType.Value}}"], &{{$dbType}}.{{.Name}}{})
         {{- end }}
     {{- end }}
